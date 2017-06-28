@@ -1,0 +1,40 @@
+ul {
+    font-size: 200%
+}
+
+li {
+    margin-bottom: 2%;
+}
+
+.memeRatingLabel {
+    border-right: 3px solid black;
+}
+
+.memeNameLabel {
+    background-color: lightgray;
+
+    padding-left: 3%;
+}
+
+.favouriteMemeButton {
+    background-color: pink;
+    color: magenta;
+}
+
+.removeMemeButton {
+    background-color: olivedrab;
+    color: brown;
+}
+
+.updootMemeButton, .downdootMemeButton {
+    background-color: lightblue;
+    color: blue;
+}
+
+.memeButton {
+    font-weight: bold;
+}
+
+.memeButton:hover {
+    filter: brightness(80%);
+}
