@@ -20,7 +20,7 @@ const app = {
      */
     init (formNameSelector) {
         // general
-        this.setAdminStatus(true);
+        this.setAdminStatus(false);
         this.refreshMemeList();
 
         // initialize addMemeForm
