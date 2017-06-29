@@ -8,6 +8,8 @@ var config = {
     messagingSenderId: "649049722518"
 };
 
+memes = [];
+
 const app = {
     memeCount: 0,
 
@@ -16,10 +18,10 @@ const app = {
      *
      * @method init
      *
-     * @param {string} formName - name of the form to attach submitMeme to
+     * @param {string} formNameSelector - name of the form to attach submitMeme to
      */
-    init (formName) {
-        document.querySelector(formName).addEventListener('submit', this.submitMeme.bind(this));
+    init (formNameSelector) {
+        document.querySelector(formNameSelector).addEventListener('submit', this.submitMeme.bind(this));
     },
 
     /**
@@ -36,7 +38,7 @@ const app = {
         const form = ev.target;
 
         // check if meme already exists
-        // check by name
+        // check by 'name'
         const result = memes.filter(meme => meme.name == form.memeName.value);
         if (result.length) {
             alert("Meme already exists!");
@@ -47,7 +49,8 @@ const app = {
         const meme = {
             id: this.memeCount,
             name: form.memeName.value,
-            rating: 0
+            rating: 0,
+            favourite: -1
         };
 
         // update the amount of memes
@@ -58,6 +61,9 @@ const app = {
 
         // refresh #memeList
         this.refreshMemeList();
+
+        // erase the input bar
+        form.memeName.value = "";
     },
 
     /**
@@ -162,8 +168,17 @@ const app = {
 
         // configure
         favouriteMemeButton.innerHTML = "💕";
-        favouriteMemeButton.className = "favouriteMemeButton medium-1 cell memeButton";
+        favouriteMemeButton.className = "medium-1 cell memeButton";
         favouriteMemeButton.dataset.meme = meme.name;
+
+        if (meme.favourite == 1) {
+            favouriteMemeButton.className += " favouriteMemeButton-selected";
+        } else {
+            favouriteMemeButton.className += " favouriteMemeButton-unselected";
+        }
+
+        // set event listener
+        favouriteMemeButton.addEventListener("click", this.favouriteMeme);
 
         // return finished favouriteMemeButton
         return favouriteMemeButton;
@@ -239,26 +254,6 @@ const app = {
     },
 
     /**
-     * Removes a specified meme from memes.
-     *
-     * @method removeMeme
-     */
-    removeMeme () {
-        // get meme data
-        const memeName = this.dataset.meme;
-        const meme = memes.filter(meme => meme.name == memeName);
-        
-        // remove meme from memes
-        const memeIndex = memes.indexOf(meme[0]);
-        if (memeIndex > -1) {
-            memes.splice(memeIndex, 1);
-        }
-
-        // refresh the meme list to mimic changes
-        app.refreshMemeList();
-    },
-
-    /**
      * Updoots a specified meme.
      *
      * @method updootMeme
@@ -292,6 +287,46 @@ const app = {
         const memeIndex = memes.indexOf(meme[0]);
         if (memeIndex > -1) {
             memes[memeIndex].rating--;
+        }
+
+        // refresh the meme list to mimic changes
+        app.refreshMemeList();
+    },
+
+    /**
+     * Favourites a specified meme.
+     *
+     * @method favouriteMeme
+     */
+    favouriteMeme () {
+        // get meme data
+        const memeName = this.dataset.meme;
+        const meme = memes.filter(meme => meme.name == memeName);
+        
+        // remove meme from memes
+        const memeIndex = memes.indexOf(meme[0]);
+        if (memeIndex > -1) {
+            memes[memeIndex].favourite *= -1;
+        }
+
+        // refresh the meme list to mimic changes
+        app.refreshMemeList();
+    },
+
+    /**
+     * Removes a specified meme from memes.
+     *
+     * @method removeMeme
+     */
+    removeMeme () {
+        // get meme data
+        const memeName = this.dataset.meme;
+        const meme = memes.filter(meme => meme.name == memeName);
+        
+        // remove meme from memes
+        const memeIndex = memes.indexOf(meme[0]);
+        if (memeIndex > -1) {
+            memes.splice(memeIndex, 1);
         }
 
         // refresh the meme list to mimic changes

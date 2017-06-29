@@ -1,3 +1,10 @@
+.memeCategory {
+    margin: 1%;
+    border: 1px solid slategrey;
+    background-color: grey;
+    height: 7%;
+}
+
 ul {
     font-size: 200%
 }
@@ -16,7 +23,12 @@ li {
     padding-left: 3%;
 }
 
-.favouriteMemeButton {
+.favouriteMemeButton-unselected {
+    background-color: pink;
+    color: grey;
+}
+
+.favouriteMemeButton-selected, .favouriteMemeButton-unselected:hover {
     background-color: pink;
     color: magenta;
 }
