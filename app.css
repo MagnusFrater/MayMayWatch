@@ -14,6 +14,11 @@ fieldset {
     margin-top: 5%;
 }
 
+#chosenMemeHeader {
+    text-decoration: underline;
+    margin-bottom: 3%;
+}
+
 ul {
     font-size: 200%
 }

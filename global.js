@@ -2,4 +2,8 @@
 memes = [];
 
 // selected category of meme
-selectedCategory = "image";
+selectedCategory = "bestof";
+document.getElementById("chosenMemeHeader").textContent = "Best Of";
+
+// handles how much functionality should be given to the user
+isAdmin = false;

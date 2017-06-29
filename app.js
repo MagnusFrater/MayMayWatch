@@ -20,12 +20,8 @@ const app = {
      */
     init (formNameSelector) {
         // general
-        this.toggleAddMemeForm(false);
-        this.toggleNoMemesExistListItem(false);
-        this.refreshMemeList();
-
-        // init user data
         this.setAdminStatus(true);
+        this.refreshMemeList();
 
         // initialize addMemeForm
         document.querySelector(formNameSelector).addEventListener("submit", this.submitMeme.bind(this));
@@ -43,7 +39,7 @@ const app = {
      * @method setAdminStatus
      */
     setAdminStatus (status) {
-        admin = status;
+        isAdmin = status;
         this.toggleAddMemeForm(status);
     },
 
@@ -62,7 +58,7 @@ const app = {
             addMemeForm.classList.remove("hide");
         } else {
             // form showing, hide it
-            addMemeForm.className += " hide";
+            addMemeForm.className += "hide";
         }
     },
 
@@ -72,6 +68,8 @@ const app = {
      * @method showBestOfMemes
      */
     showBestOfMemes () {
+        document.getElementById("chosenMemeHeader").textContent = "Best Of";
+
         selectedCategory = "bestof";
         this.refreshMemeList();
     },
@@ -82,6 +80,8 @@ const app = {
      * @method showImageMemes
      */
     showImageMemes () {
+        document.getElementById("chosenMemeHeader").textContent = "Images";
+
         selectedCategory = "image";
         this.refreshMemeList();
     },
@@ -92,6 +92,8 @@ const app = {
      * @method showVideoMemes
      */
     showVideoMemes () {
+        document.getElementById("chosenMemeHeader").textContent = "Videos";
+
         selectedCategory = "video";
         this.refreshMemeList();
     },
@@ -102,6 +104,8 @@ const app = {
      * @method showSoundMemes
      */
     showSoundMemes () {
+        document.getElementById("chosenMemeHeader").textContent = "Sounds";
+
         selectedCategory = "sound";
         this.refreshMemeList();
     },
@@ -175,8 +179,8 @@ const app = {
         // reset form
         form.memeName.value = "";
         form.imageCheckbox.checked = false;
-        form.imageCheckbox.checked = false;
-        form.imageCheckbox.checked = false;
+        form.videoCheckbox.checked = false;
+        form.soundCheckbox.checked = false;
     },
 
     /**
@@ -206,11 +210,9 @@ const app = {
 
         // check if memArray has memes
         if (memeArray.length == 0) {
-            // can show special "no memes :(" message
-            this.toggleNoMemesExistListItem(true);
+            // show "no memes :("
+            memeList.appendChild(this.createNoMemesExistListItem());
         } else {
-            this.toggleNoMemesExistListItem(false);
-
             // sort the memes based on their 'location' property
             // cycle through sorted memes, append them to #memeList as <li>
             memeArray
@@ -220,22 +222,21 @@ const app = {
     },
 
     /**
-     * Shows/hides the noMemesExistListItem.
+     * Creates the createNoMemesExistListItem and places it into #memeList
      *
-     * @method toggleNoMemesExistListItem
-     * 
-     * @param {boolean} toggle - if true, shows noMemesExistListItem; if false, hide it
+     * @method createNoMemesExistListItem
      */
-    toggleNoMemesExistListItem (toggle) {
-        const noMemesExistListItem = document.getElementById("noMemesExistListItem");
+    createNoMemesExistListItem () {
+        // create new div
+        const noMemesExistListItem = document.createElement("div");
 
-        if (toggle) {
-            // form hidden, show it
-            noMemesExistListItem.classList.remove("hide");
-        } else {
-            // form showing, hide it
-            noMemesExistListItem.className += " hide";
-        }
+        // configure
+        noMemesExistListItem.id = "noMemesExistListItem";
+        noMemesExistListItem.className = "text-center";
+        noMemesExistListItem.textContent = "No Memes :(";
+
+        // return newly created noMemesExistListItem
+        return noMemesExistListItem;
     },
 
     /**
@@ -260,7 +261,7 @@ const app = {
         memeListItem.appendChild(this.createUpdootMemeButton(meme));
         memeListItem.appendChild(this.createDowndootMemeButton(meme));
         memeListItem.appendChild(this.createFavouriteMemeButton(meme));
-        memeListItem.appendChild(this.createRemoveMemeButton(meme));
+        if (isAdmin) memeListItem.appendChild(this.createRemoveMemeButton(meme));
 
         // return finished <li>
         return memeListItem;
@@ -485,5 +486,7 @@ const app = {
     }
 }
 
-// initialize the app
-app.init("form#addMemeForm");
+window.onload = function () {
+    // initialize the app
+    app.init("form#addMemeForm");
+};
