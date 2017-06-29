@@ -24,3 +24,19 @@ A catalog of the extensive world of memes.
 ### Super Mega Bonus Credit Hyper Fighting
 
 * Add buttons that move a flick up and down the list.
+
+## Day 4 Homework
+
+* Finish implementing _move up_ and _move down_.
+
+### Bonus Credit
+
+* Allow users to edit the names of existing flicks. Woudln't it be nice if we could make that `span`'s **content editable**?
+
+### Super Mega Bonus Credit
+
+* Persist the data using `local storage`. When you refresh the page, your flicks should still be there.
+
+### Super Mega Bonus Credit Hyper Fighting
+
+* Allow users to filter the list of flicks.

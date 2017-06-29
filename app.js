@@ -8,8 +8,6 @@ var config = {
     messagingSenderId: "649049722518"
 };
 
-memes = [];
-
 const app = {
     memeCount: 0,
 
@@ -21,7 +19,91 @@ const app = {
      * @param {string} formNameSelector - name of the form to attach submitMeme to
      */
     init (formNameSelector) {
-        document.querySelector(formNameSelector).addEventListener('submit', this.submitMeme.bind(this));
+        // general
+        this.toggleAddMemeForm(false);
+        this.toggleNoMemesExistListItem(false);
+        this.refreshMemeList();
+
+        // init user data
+        this.setAdminStatus(true);
+
+        // initialize addMemeForm
+        document.querySelector(formNameSelector).addEventListener("submit", this.submitMeme.bind(this));
+
+        // attach memeCategoryButtons
+        document.getElementById("category-bestOf").addEventListener("click", this.showBestOfMemes.bind(this));
+        document.getElementById("category-images").addEventListener("click", this.showImageMemes.bind(this));
+        document.getElementById("category-videos").addEventListener("click", this.showVideoMemes.bind(this));
+        document.getElementById("category-sounds").addEventListener("click", this.showSoundMemes.bind(this));
+    },
+
+    /**
+     * Sets the admin status of the user. Dis/allows a user to add a meme.
+     *
+     * @method setAdminStatus
+     */
+    setAdminStatus (status) {
+        admin = status;
+        this.toggleAddMemeForm(status);
+    },
+
+    /**
+     * Shows/hides the addMemeForm.
+     *
+     * @method toggleAddMemeForm
+     * 
+     * @param {boolean} toggle - if true, shows addMemeForm; if false, hide it
+     */
+    toggleAddMemeForm (toggle) {
+        const addMemeForm = document.getElementById("addMemeForm");
+
+        if (toggle) {
+            // form hidden, show it
+            addMemeForm.classList.remove("hide");
+        } else {
+            // form showing, hide it
+            addMemeForm.className += " hide";
+        }
+    },
+
+    /**
+     * Shows only top voted memes.
+     *
+     * @method showBestOfMemes
+     */
+    showBestOfMemes () {
+        selectedCategory = "bestof";
+        this.refreshMemeList();
+    },
+
+    /**
+     * Only shows image memes.
+     *
+     * @method showImageMemes
+     */
+    showImageMemes () {
+        selectedCategory = "image";
+        this.refreshMemeList();
+    },
+
+    /**
+     * Only shows video memes.
+     *
+     * @method showVideoMemes
+     */
+    showVideoMemes () {
+        selectedCategory = "video";
+        this.refreshMemeList();
+    },
+
+    /**
+     * Only shows sound memes.
+     *
+     * @method showSoundMemes
+     */
+    showSoundMemes () {
+        selectedCategory = "sound";
+        this.refreshMemeList();
     },
 
     /**
@@ -43,6 +125,12 @@ const app = {
             return;
         }
 
+        // make sure at least one meme type is checked
+        if (!form.imageCheckbox.checked && !form.videoCheckbox.checked && !form.soundCheckbox.checked) {
+            alert("A meme always has a type!");
+            return;
+        }
+
         // check if meme already exists
         // check by 'name'
         const result = memes.filter(meme => meme.name == form.memeName.value);
@@ -56,8 +144,24 @@ const app = {
             id: this.memeCount,
             name: form.memeName.value,
             rating: 0,
-            favourite: -1
+            favourite: -1,
+            category: ""
         };
+
+        // add image category to meme if checked
+        if (form.imageCheckbox.checked) {
+            meme.category = "image";
+        }
+
+        // add video category to meme if checked
+        if (form.videoCheckbox.checked) {
+            meme.category += " video";
+        }
+
+        // add sound category to meme if checked
+        if (form.soundCheckbox.checked) {
+            meme.category += " sound";
+        }
 
         // update the amount of memes
         this.memeCount++;
@@ -68,8 +172,11 @@ const app = {
         // refresh #memeList
         this.refreshMemeList();
 
-        // erase the input bar
+        // reset form
         form.memeName.value = "";
+        form.imageCheckbox.checked = false;
+        form.imageCheckbox.checked = false;
+        form.imageCheckbox.checked = false;
     },
 
     /**
@@ -86,11 +193,49 @@ const app = {
             memeList.removeChild(memeList.firstChild);
         }
 
-        // sort the memes based on their 'location' property
-        // cycle through sorted memes, append them to #memeList as <li>
-        memes
-            .sort((a,b) => (a.rating < b.rating)? 1 : -1)
-            .forEach(meme => memeList.appendChild(this.createMemeListItem(meme)));
+        // get chosen category of memes
+        let memeArray;
+
+        if (selectedCategory != "bestof") {
+            // filter memes by category
+            memeArray = memes.filter(meme => meme.category.includes(selectedCategory));
+        } else {
+            // filter memes by rating
+            memeArray = memes;
+        }
+
+        // check if memArray has memes
+        if (memeArray.length == 0) {
+            // can show special "no memes :(" message
+            this.toggleNoMemesExistListItem(true);
+        } else {
+            this.toggleNoMemesExistListItem(false);
+
+            // sort the memes based on their 'location' property
+            // cycle through sorted memes, append them to #memeList as <li>
+            memeArray
+                .sort((a,b) => (a.rating < b.rating)? 1 : -1)
+                .forEach(meme => memeList.appendChild(this.createMemeListItem(meme)));
+        }
+    },
+
+    /**
+     * Shows/hides the noMemesExistListItem.
+     *
+     * @method toggleNoMemesExistListItem
+     * 
+     * @param {boolean} toggle - if true, shows noMemesExistListItem; if false, hide it
+     */
+    toggleNoMemesExistListItem (toggle) {
+        const noMemesExistListItem = document.getElementById("noMemesExistListItem");
+
+        if (toggle) {
+            // form hidden, show it
+            noMemesExistListItem.classList.remove("hide");
+        } else {
+            // form showing, hide it
+            noMemesExistListItem.className += " hide";
+        }
     },
 
     /**
