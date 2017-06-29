@@ -37,6 +37,12 @@ const app = {
         // get the form
         const form = ev.target;
 
+        // check if addMeme input bar is empty
+        if (form.memeName.value.length == 0) {
+            alert("Add meme bar is empty!");
+            return;
+        }
+
         // check if meme already exists
         // check by 'name'
         const result = memes.filter(meme => meme.name == form.memeName.value);
