@@ -1,3 +1,9 @@
+#searchDiv {
+    background-color: magenta;
+    margin: 0;
+    padding: 0;
+}
+
 .memeCategory {
     margin: 1%;
     border: 1px solid slategrey;

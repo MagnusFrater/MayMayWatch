@@ -24,7 +24,11 @@ const app = {
         this.refreshMemeList();
 
         // initialize addMemeForm
-        document.querySelector(formNameSelector).addEventListener("submit", this.submitMeme.bind(this));
+        document.querySelector("form#addMemeForm").addEventListener("submit", this.submitMeme.bind(this));
+
+        document.getElementById("searchForm").addEventListener("submit", this.showSearchMemes.bind(this));
+        document.getElementById("searchForm").addEventListener("change", this.showSearchMemes.bind(this));
+        document.getElementById("searchForm").addEventListener("keyup", this.showSearchMemes.bind(this));
 
         // attach memeCategoryButtons
         document.getElementById("category-bestOf").addEventListener("click", this.showBestOfMemes.bind(this));
@@ -41,6 +45,7 @@ const app = {
     setAdminStatus (status) {
         isAdmin = status;
         this.toggleAddMemeForm(status);
+        this.refreshMemeList();
     },
 
     /**
@@ -68,8 +73,13 @@ const app = {
      * @method showBestOfMemes
      */
     showBestOfMemes () {
+        // reset the searchbar
+        this.resetSearchBar();
+
+        // set chosenMemeHeader
         document.getElementById("chosenMemeHeader").textContent = "Best Of";
 
+        // change category and refresh [memes]
         selectedCategory = "bestof";
         this.refreshMemeList();
     },
@@ -80,8 +90,13 @@ const app = {
      * @method showImageMemes
      */
     showImageMemes () {
+        // reset the searchbar
+        this.resetSearchBar();
+
+        // set chosenMemeHeader
         document.getElementById("chosenMemeHeader").textContent = "Images";
 
+        // change category and refresh [memes]
         selectedCategory = "image";
         this.refreshMemeList();
     },
@@ -92,8 +107,13 @@ const app = {
      * @method showVideoMemes
      */
     showVideoMemes () {
+        // reset the searchbar
+        this.resetSearchBar();
+
+        // set chosenMemeHeader
         document.getElementById("chosenMemeHeader").textContent = "Videos";
 
+        // change category and refresh [memes]
         selectedCategory = "video";
         this.refreshMemeList();
     },
@@ -104,9 +124,54 @@ const app = {
      * @method showSoundMemes
      */
     showSoundMemes () {
+        // reset the searchbar
+        this.resetSearchBar();
+
+        // set chosenMemeHeader
         document.getElementById("chosenMemeHeader").textContent = "Sounds";
 
+        // change category and refresh [memes]
         selectedCategory = "sound";
+        this.refreshMemeList();
+    },
+
+    /**
+     * Only shows searched memes.
+     *
+     * @method showSearchMemes
+     */
+    showSearchMemes (ev) {
+        ev.preventDefault();
+
+        // get searchTerm
+        const searchTerm = document.getElementById("searchBar").value;
+
+        // if searchBar is empty, stop searching
+        /*
+        if (searchTerm.length == 0 || searchTerm == "" || this.isTextOnlySpaces(searchTerm)) {
+            //this.resetSearchBar();
+            return;
+        }
+        */
+
+        // set chosenMemeHeader
+        document.getElementById("chosenMemeHeader").textContent = "Search: \"" + searchTerm +"\"";
+
+        // change category and refresh [memes]
+        selectedCategory = "search";
+        this.refreshMemeList(searchTerm);
+    },
+
+    /**
+     * Only shows searched memes.
+     *
+     * @method resetSearchBar
+     */
+    resetSearchBar () {
+        document.getElementById("searchBar").value = "";
+
+        // change category and refresh [memes]
+        selectedCategory = "bestOf";
         this.refreshMemeList();
     },
 
@@ -126,12 +191,14 @@ const app = {
         // check if addMeme input bar is empty
         if (form.memeName.value.length == 0) {
             alert("Add meme bar is empty!");
+            this.resetAddMemeForm(form);
             return;
         }
 
         // make sure at least one meme type is checked
         if (!form.imageCheckbox.checked && !form.videoCheckbox.checked && !form.soundCheckbox.checked) {
             alert("A meme always has a type!");
+            this.resetAddMemeForm(form);
             return;
         }
 
@@ -140,6 +207,7 @@ const app = {
         const result = memes.filter(meme => meme.name == form.memeName.value);
         if (result.length) {
             alert("Meme already exists!");
+            this.resetAddMemeForm(form);
             return;
         }
 
@@ -177,6 +245,15 @@ const app = {
         this.refreshMemeList();
 
         // reset form
+        this.resetAddMemeForm(form);
+    },
+
+    /**
+     * Resets the input fields of addMemeForm.
+     *
+     * @method resetAddMemeForm
+     */
+    resetAddMemeForm (form) {
         form.memeName.value = "";
         form.imageCheckbox.checked = false;
         form.videoCheckbox.checked = false;
@@ -188,7 +265,7 @@ const app = {
      *
      * @method refreshMemeList
      */
-    refreshMemeList () {
+    refreshMemeList (searchTerm) {
         // get #memeList
         const memeList = document.querySelector("#memeList");
 
@@ -200,12 +277,19 @@ const app = {
         // get chosen category of memes
         let memeArray;
 
-        if (selectedCategory != "bestof") {
-            // filter memes by category
-            memeArray = memes.filter(meme => meme.category.includes(selectedCategory));
-        } else {
+        if (selectedCategory == "bestof") {
             // filter memes by rating
             memeArray = memes;
+        } else if (selectedCategory == "search") {
+            // make sure searchTerm exists and isn't blank
+            if (searchTerm && searchTerm.length != 0 && searchTerm != ""){
+                memeArray = memes.filter(meme => meme.name.toLowerCase().includes(searchTerm.toLowerCase()));
+            } else {
+                memeArray = [];
+            }
+        } else {
+            // filter memes by category
+            memeArray = memes.filter(meme => meme.category.includes(selectedCategory));
         }
 
         // check if memArray has memes
@@ -483,10 +567,29 @@ const app = {
 
         // refresh the meme list to mimic changes
         app.refreshMemeList();
+    },
+
+    /**
+     * Checks if a given string is only whitespace
+     *
+     * @method isTextOnlySpaces
+     * 
+     * @param {string} str - string to check
+     * 
+     * @return {boolean} returns true if str is only whitespace; false if otherwise
+     */
+    isTextOnlySpaces (str) {
+        for (i=0; i<str.length; i++) {
+            if (str.charAt(i) != " ") {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
 
 window.onload = function () {
     // initialize the app
-    app.init("form#addMemeForm");
+    app.init();
 };
