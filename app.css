@@ -50,3 +50,14 @@ li {
 .memeButton:hover {
     filter: brightness(80%);
 }
+
+#signupButton {
+    position: fixed;
+    top: 1em;
+    right: 1em;
+    color: black;
+}
+
+#signupButton:hover {
+    color: grey;
+}
