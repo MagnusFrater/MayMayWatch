@@ -1,0 +1,2 @@
+// array of memes
+memes = [];

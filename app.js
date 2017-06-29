@@ -1,4 +1,12 @@
-memes = [];
+// firebase config
+var config = {
+    apiKey: "AIzaSyCM4jxJnp53OEIxB8OH8M9o4hO16LRve9M",
+    authDomain: "maymaywatch-87e73.firebaseapp.com",
+    databaseURL: "https://maymaywatch-87e73.firebaseio.com",
+    projectId: "maymaywatch-87e73",
+    storageBucket: "maymaywatch-87e73.appspot.com",
+    messagingSenderId: "649049722518"
+};
 
 const app = {
     memeCount: 0,

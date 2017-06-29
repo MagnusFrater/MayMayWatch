@@ -1,43 +1,205 @@
-// GLOBAL DATA
-memes = {};
-// GLOBAL DATA
-
-// firebase data
+// listeners
 let memeListener;
 
-// Initialize Firebase
-var config = {
-    apiKey: "AIzaSyCM4jxJnp53OEIxB8OH8M9o4hO16LRve9M",
-    authDomain: "maymaywatch-87e73.firebaseapp.com",
-    databaseURL: "https://maymaywatch-87e73.firebaseio.com",
-    projectId: "maymaywatch-87e73",
-    storageBucket: "maymaywatch-87e73.appspot.com",
-    messagingSenderId: "649049722518"
-};
-firebase.initializeApp(config);
+/**
+ * Initializes firebase.
+ *
+ * @method initFirebase
+ * 
+ * @param {object} config - firebase config 
+ * @param {callback} onSignInCallback - (OPTIONAL) callback called on user sign in (auth)
+ * @param {callback} onSignOutCallback - (OPTIONAL) callback called on user sign out (unauth)
+ */
+function initFirebase (config, onSignInCallback, onSignOutCallback) {
+    // initialize firebase
+    firebase.initializeApp(config);
 
-// sign in anonymously
-firebase.auth().signInAnonymously().catch(function(error) {
-    // Handle Errors here.
-    console.error(error.code);
-    console.error(error.message);
-});
+    // set auth state changed listener 
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            // user is signed in.
+            console.log("User is signed in.");
 
-// check authentication state changes
-firebase.auth().onAuthStateChanged(function(user) {
-  if (user) {
-    // User is signed in.
-    //var isAnonymous = user.isAnonymous;
-    //var uid = user.uid;
-    console.log("User is signed in anonymously.");
+            // call onSignInCallback if it exists
+            if (onSignInCallback) {
+                onSignInCallback();
+            }
+        } else {
+            // user is signed out
+            console.log("User is signed out.");
 
-    // get memes from online database
-    getMemes();
+            // call onSignOutCallback if it exists
+            if (onSignOutCallback) {
+                onSignOutCallback();
+            }
+        }
+    });
+}
 
-  } else {
-    console.log("User is signed out.");
-  }
-});
+/**
+ * Signs a user up via email/password auth.
+ *
+ * @method signUpEmail
+ * 
+ * @param {string} email - sign up email
+ * @param {string} password - sign up password
+ * @param {string} repassword - reentered sign up password
+ * @param {boolean} showAlert - (OPTIONAL) show errorMessage as alert
+ */
+function signUpEmail (email, password, repassword, showAlert) {
+    // check if given signUpEmail credentials are valid
+    if (areSignUpCredentialsValid(email, password, repassword, showAlert)) {
+
+        // create new user via email/password auth
+        firebase.auth().createUserWithEmailAndPassword(email, password)
+            .catch(function(error) {
+                // get error message
+                const errorMessage = error.code + ": " + error.message;
+
+                // print error message
+                console.exception(errorMessage);
+                alert("Failure to sign up!");
+            }
+        );
+    }
+}
+
+/**
+ * Checks to see if email sign up credentials are valid.
+ *
+ * @method areEmailSignUpCredentialsValid
+ *
+ * @param {string} email - sign up email
+ * @param {string} password - sign up password
+ * @param {string} repassword - reentered sign up password
+ * @param {boolean} showAlert - (OPTIONAL) show errorMessage as alert
+ */
+function areEmailSignUpCredentialsValid (email, password, repassword, showAlert) {
+    let errorMessage;
+
+    // email
+    if (!email) {
+        errorMessage = "Email is empty!";
+    }
+
+    if (email.length == 0) {
+        errorMessage = "Email is too short!";
+    }
+
+    // password
+    if (!password) {
+        errorMessage = "Password is empty!";
+    }
+
+    if (password.length == 0) {
+        errorMessage = "Password is too short!";
+    }
+
+    // repassword
+    if (!repassword) {
+        errorMessage = "Repassword is empty!";
+    }
+
+    if (repassword.length == 0) {
+        errorMessage = "Repassword is too short!";
+    }
+
+    if (password != repassword) {
+        errorMesage = "Password doesn't match Repassword!";
+    }
+
+    // handle errorMessage
+    if (errorMessage) {
+        // print errorMessage to console
+        console.exception(errorMessage);
+
+        // show alert only is specified
+        if (showAlert) {
+            alert(errorMessage);
+        }
+
+        // credentials invalid
+        return false;
+    } else {
+        // credentials valid
+        return true;
+    }
+}
+
+/**
+ * Logs in a user via email/password auth.
+ *
+ * @method loginEmail
+ * 
+ * @param {string} email - login email
+ * @param {string} password - login password
+ * @param {boolean} showAlert - (OPTIONAL) show errorMessage as alert
+ */
+function loginEmail (email, password, showAlert) {
+    // check if given loginEmail credentials are valid
+    if (areEmailLoginCredentialsValid(email, password, showAlert)) {
+
+        // create new user via email/password auth
+        //TODO
+    }
+}
+
+/**
+ * Checks to see if email login credentials are valid.
+ *
+ * @method areEmailLoginCredentialsValid
+ *
+ * @param {string} email - sign up email
+ * @param {string} password - sign up password
+ * @param {boolean} showAlert - (OPTIONAL) show errorMessage as alert
+ */
+function areEmailLoginCredentialsValid (email, password, showAlert) {
+    let errorMessage;
+
+    // email
+    if (!email) {
+        errorMessage = "Email is empty!";
+    }
+
+    if (email.length == 0) {
+        errorMessage = "Email is too short!";
+    }
+
+    // password
+    if (!password) {
+        errorMessage = "Password is empty!";
+    }
+
+    if (password.length == 0) {
+        errorMessage = "Password is too short!";
+    }
+
+    // handle errorMessage
+    if (errorMessage) {
+        // print errorMessage to console
+        console.exception(errorMessage);
+
+        // show alert only is specified
+        if (showAlert) {
+            alert(errorMessage);
+        }
+
+        // credentials invalid
+        return false;
+    } else {
+        // credentials valid
+        return true;
+    }
+}
+
+/**
+ * Logs out a user.
+ *
+ * @method logout
+ */
+function logout () {
+
+}
 
 // add a new meme to the database
 function addNewMeme (category, meme) {
