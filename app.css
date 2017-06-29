@@ -1,9 +1,11 @@
+/* SEARCH BAR */
 #searchDiv {
     background-color: magenta;
     margin: 0;
     padding: 0;
 }
 
+/* MEME CATEGORIES */
 .memeCategory {
     margin: 1%;
     border: 1px solid slategrey;
@@ -11,6 +13,7 @@
     height: 7%;
 }
 
+/* ADD MEME FORM */
 fieldset {
     margin-left: 2%;
     margin-right: 2%;
@@ -20,11 +23,13 @@ fieldset {
     margin-top: 5%;
 }
 
+/* CHOSEN MEME HEADER */
 #chosenMemeHeader {
     text-decoration: underline;
     margin-bottom: 3%;
 }
 
+/* MEME LIST */
 ul {
     font-size: 200%
 }
@@ -58,6 +63,14 @@ li {
     color: brown;
 }
 
+.removeMemeButton, .updootMemeButton, .downdootMemeButton {
+    filter: brightness(80%);
+}
+
+.removeMemeButton:hover, .updootMemeButton:hover, .downdootMemeButton:hover {
+    filter: brightness(100%);
+}
+
 .updootMemeButton, .downdootMemeButton {
     background-color: lightblue;
     color: blue;
@@ -68,9 +81,10 @@ li {
 }
 
 .memeButton:hover {
-    filter: brightness(80%);
+    filter: brightness(100%);
 }
 
+/* SIGNUP BUTTON*/
 #signupButton {
     position: fixed;
     top: 1em;
@@ -80,4 +94,79 @@ li {
 
 #signupButton:hover {
     color: grey;
+}
+
+/* SIGNUP MODAL */
+#signupModalBackground {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+#signupModalContent {
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    position: relative;
+    padding: 10px;
+    overflow: hidden;
+    width: 600px;
+
+    background-color: whitesmoke;
+}
+
+#signupModalContent h1 {
+    color: darkslategrey;
+}
+
+#signupModalContent input {
+    margin-bottom: 5%;
+}
+
+#signupModalCloseButton {
+    position: absolute;
+    float: right;
+
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+#signupModalCloseButton:hover,
+#signupModalCloseButton:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#signupModalLoginContent {
+    width: 275px;
+}
+
+#signupModalSignupContent {
+    width: 275px;
+}
+
+.modalLeft {
+    float: left;
+}
+
+.modalRight {
+    float: right;
+}
+
+.verticalDivider {
+    position: absolute;
+    left: 50%;
+    top: 10%;
+    bottom: 10%;
+    border-left: 1px solid gray;
 }

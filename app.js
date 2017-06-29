@@ -23,18 +23,25 @@ const app = {
         this.setAdminStatus(true);
         this.refreshMemeList();
 
-        // initialize addMemeForm
-        document.querySelector("form#addMemeForm").addEventListener("submit", this.submitMeme.bind(this));
+        // attach addMemeForm listeners
+        document.getElementById("addMemeForm").addEventListener("submit", this.submitMeme.bind(this));
 
+        // attach searchBar listeners
         document.getElementById("searchForm").addEventListener("submit", this.showSearchMemes.bind(this));
         document.getElementById("searchForm").addEventListener("change", this.showSearchMemes.bind(this));
         document.getElementById("searchForm").addEventListener("keyup", this.showSearchMemes.bind(this));
 
-        // attach memeCategoryButtons
+        // attach memeCategoryButtons listeners
         document.getElementById("category-bestOf").addEventListener("click", this.showBestOfMemes.bind(this));
         document.getElementById("category-images").addEventListener("click", this.showImageMemes.bind(this));
         document.getElementById("category-videos").addEventListener("click", this.showVideoMemes.bind(this));
         document.getElementById("category-sounds").addEventListener("click", this.showSoundMemes.bind(this));
+
+        // attach signupModal listeners
+        document.getElementById("signupButton").addEventListener("click", this.toggleSignupModal);
+        document.getElementById("signupModalCloseButton").addEventListener("click", this.toggleSignupModal);
+        document.getElementById("").addEventListener("click", ?);
+        document.getElementById("").addEventListener("click", ?);
     },
 
     /**
@@ -567,6 +574,24 @@ const app = {
 
         // refresh the meme list to mimic changes
         app.refreshMemeList();
+    },
+
+    /**
+     * Brings up the signup modal.
+     *
+     * @method toggleSignupModal
+     */
+    toggleSignupModal () {
+        // get necessary elements
+        const modal = document.getElementById("signupModalBackground");
+
+        if (this.id == "signupButton") {
+            // show signupModal
+            modal.style.display = "block";
+        } else {
+            // hide signupModal
+            modal.style.display = "none";
+        }
     },
 
     /**
