@@ -582,19 +582,11 @@ const app = {
      *
      * @method toggleSignupModal
      */
-    toggleSignupModal (toggle) {
+    toggleSignupModal () {
         // get necessary elements
         const modal = document.getElementById("signupModalBackground");
 
-        if (this.id == "signupButton") {
-            // show signupModal
-            modal.style.display = "block";
-        } else {
-            // hide signupModal
-            modal.style.display = "none";
-        }
-
-        if (toggle) {
+        if (this.id == "signupModalButton") {
             // show signupModal
             modal.style.display = "block";
         } else {
