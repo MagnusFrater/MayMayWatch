@@ -15,33 +15,18 @@ const app = {
      * Initializes the app.
      *
      * @method init
-     *
-     * @param {string} formNameSelector - name of the form to attach submitMeme to
      */
-    init (formNameSelector) {
+    init () {
         // general
+        this.setSelectedMemeCategory("bestof");
         this.setAdminStatus(true);
-        this.refreshMemeList();
 
-        // attach addMemeForm listeners
-        document.getElementById("addMemeForm").addEventListener("submit", this.submitMeme.bind(this));
+        // attach listeners
+        this.attachAllListeners();
 
-        // attach searchBar listeners
-        document.getElementById("searchForm").addEventListener("submit", this.showSearchMemes.bind(this));
-        document.getElementById("searchForm").addEventListener("change", this.showSearchMemes.bind(this));
-        document.getElementById("searchForm").addEventListener("keyup", this.showSearchMemes.bind(this));
-
-        // attach memeCategoryButtons listeners
-        document.getElementById("category-bestOf").addEventListener("click", this.showBestOfMemes.bind(this));
-        document.getElementById("category-images").addEventListener("click", this.showImageMemes.bind(this));
-        document.getElementById("category-videos").addEventListener("click", this.showVideoMemes.bind(this));
-        document.getElementById("category-sounds").addEventListener("click", this.showSoundMemes.bind(this));
-
-        // attach signupModal listeners
-        document.getElementById("signupButton").addEventListener("click", this.toggleSignupModal);
-        document.getElementById("signupModalCloseButton").addEventListener("click", this.toggleSignupModal);
-        document.getElementById("").addEventListener("click", ?);
-        document.getElementById("").addEventListener("click", ?);
+        // initialize firebase
+        Fire.init(config);
+        Fire.createAuthStateListener(this.signinCallback, this.signoutCallback);
     },
 
     /**
@@ -84,10 +69,9 @@ const app = {
         this.resetSearchBar();
 
         // set chosenMemeHeader
-        document.getElementById("chosenMemeHeader").textContent = "Best Of";
+        this.setSelectedMemeCategory("bestof");
 
-        // change category and refresh [memes]
-        selectedCategory = "bestof";
+        // refresh [memes]
         this.refreshMemeList();
     },
 
@@ -101,10 +85,9 @@ const app = {
         this.resetSearchBar();
 
         // set chosenMemeHeader
-        document.getElementById("chosenMemeHeader").textContent = "Images";
+        this.setSelectedMemeCategory("image");
 
-        // change category and refresh [memes]
-        selectedCategory = "image";
+        // refresh [memes]
         this.refreshMemeList();
     },
 
@@ -118,10 +101,9 @@ const app = {
         this.resetSearchBar();
 
         // set chosenMemeHeader
-        document.getElementById("chosenMemeHeader").textContent = "Videos";
+        this.setSelectedMemeCategory("video");
 
-        // change category and refresh [memes]
-        selectedCategory = "video";
+        // refresh [memes]
         this.refreshMemeList();
     },
 
@@ -135,10 +117,9 @@ const app = {
         this.resetSearchBar();
 
         // set chosenMemeHeader
-        document.getElementById("chosenMemeHeader").textContent = "Sounds";
+        this.setSelectedMemeCategory("sound");
 
-        // change category and refresh [memes]
-        selectedCategory = "sound";
+        // refresh [memes]
         this.refreshMemeList();
     },
 
@@ -153,20 +134,40 @@ const app = {
         // get searchTerm
         const searchTerm = document.getElementById("searchBar").value;
 
-        // if searchBar is empty, stop searching
-        /*
-        if (searchTerm.length == 0 || searchTerm == "" || this.isTextOnlySpaces(searchTerm)) {
-            //this.resetSearchBar();
-            return;
-        }
-        */
+        // set selectedMeme
+        this.setSelectedMemeCategory("search", searchTerm);
 
-        // set chosenMemeHeader
-        document.getElementById("chosenMemeHeader").textContent = "Search: \"" + searchTerm +"\"";
-
-        // change category and refresh [memes]
-        selectedCategory = "search";
+        // refresh [memes]
         this.refreshMemeList(searchTerm);
+    },
+
+    /**
+     * Sets selectedCategory and updates #siteHeader.
+     *
+     * @method setSelectedMemeCategory
+     * 
+     * @param {string} category - category to set selectedCategory to
+     * @param {string} searchTerm - (ONLY IF CATEGORY="search") term to search for
+     */
+    setSelectedMemeCategory (category, searchTerm) {
+        // set selectedCategory
+        selectedCategory = category;
+
+        // change #siteHeader to mimic selectedCategory decision
+        if (category == "search") {
+            // category is "search"
+            if (searchTerm) {
+                // only show searchTerm if it exists
+                document.getElementById("siteHeader").textContent = "MayMayWatch: Search: \"" + searchTerm +"\"";
+            } else {
+                document.getElementById("siteHeader").textContent = "MayMayWatch: Search: \"\"";
+            }
+        } else if (category == "bestof") {
+            document.getElementById("siteHeader").textContent = "MayMayWatch: Best Of";
+        } else {
+            // change #siteHeader the same for the rest (images, videos, sounds)
+            document.getElementById("siteHeader").textContent = "MayMayWatch: " + this.getProperString(category) + "s";
+        }
     },
 
     /**
@@ -581,7 +582,7 @@ const app = {
      *
      * @method toggleSignupModal
      */
-    toggleSignupModal () {
+    toggleSignupModal (toggle) {
         // get necessary elements
         const modal = document.getElementById("signupModalBackground");
 
@@ -592,6 +593,16 @@ const app = {
             // hide signupModal
             modal.style.display = "none";
         }
+
+        if (toggle) {
+            // show signupModal
+            modal.style.display = "block";
+        } else {
+            // hide signupModal
+            modal.style.display = "none";
+        }
+
+        console.log("modal this");
     },
 
     /**
@@ -611,6 +622,176 @@ const app = {
         }
 
         return true;
+    },
+
+    /**
+     * Turns a string into a proper noun.
+     *
+     * @method getProperNoun
+     * 
+     * @param {string} str - the string to 'proper noun'-ify
+     */
+    getProperString (str) {
+        // make sure str exists
+        if (str) {
+            str = str.replace(/([^\W_]+[^\s-]*) */g, function(txt) {
+                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            });
+
+            // Certain minor words should be left lowercase unless 
+            // they are the first or last words in the string
+            const lowers = ['A', 'An', 'The', 'And', 'But', 'Or', 'For', 'Nor', 'As', 'At', 
+            'By', 'For', 'From', 'In', 'Into', 'Near', 'Of', 'On', 'Onto', 'To', 'With'];
+
+            for (i = 0, j = lowers.length; i < j; i++)
+                str = str.replace(new RegExp('\\s' + lowers[i] + '\\s', 'g'), 
+                function(txt) {
+                    return txt.toLowerCase();
+                });
+
+            // Certain words such as initialisms or acronyms should be left uppercase
+            const uppers = ['Id', 'Tv'];
+
+            for (i = 0, j = uppers.length; i < j; i++)
+                str = str.replace(new RegExp('\\b' + uppers[i] + '\\b', 'g'), 
+                uppers[i].toUpperCase());
+
+            // return proper string
+            return str;
+        } else {
+            // str parameter doesn't exist, return null
+            return null;
+        }
+    },
+
+    /**
+     * Handles what happens when a user signs in.
+     *
+     * @method signinCallback
+     */
+    signinCallback () {
+        // set normie to logged in
+        normie.loggedIn = true;
+    },
+
+    /**
+     * Handles what happens when a user signs out.
+     *
+     * @method signoutCallback
+     */
+    signoutCallback () {
+        // set normie to logged out
+        normie.loggedIn = false;
+    },
+
+    /**
+     * Signs user up in firebase.
+     *
+     * @method signup
+     */
+    signup (ev) {
+        ev.preventDefault();
+
+        // get the form
+        const form = ev.target;
+
+        // sign up credentials
+        const email = form.email.value;
+        const password = form.password.value;
+        const repassword = form.repassword.value;
+
+        console.log(email + " " + password + " " + repassword);
+
+        // attempt signup
+        Fire.signUpEmailPassword(email, password, repassword, true);
+
+        // close the signupModal
+        this.toggleSignupModal(false);
+    },
+
+    /**
+     * Logs user into firebase.
+     *
+     * @method login
+     */
+    login (ev) {
+        ev.preventDefault();
+
+        // get the form
+        const form = ev.target;
+
+        // login credentials
+        const email = form.email.value;
+        const password = form.password.value;
+
+        // attempt login
+        Fire.loginEmailPassword(email, password, true);
+
+        // close the signupModal
+        this.toggleSignupModal(false);
+    },
+
+    /**
+     * Attaches all listeners needed for app to function.
+     *
+     * @method attachAllListeners
+     */
+    attachAllListeners () {
+        // attach addMemeForm listeners
+        this.attachAddMemeFormListeners();
+
+        // attach searchBar listeners
+        this.attachSearchBarListeners();
+
+        // attach memeCategoryButtons listeners
+        this.attachMemeCategoryButtonListeners();
+
+        // attach signupModal listeners
+        this.attachSignupModalListeners();
+    },
+
+    /**
+     * Attaches all listeners needed for the addMemeForm.
+     *
+     * @method attachAddMemeFormListeners
+     */
+    attachAddMemeFormListeners () {
+        document.getElementById("addMemeForm").addEventListener("submit", this.submitMeme.bind(this));
+    },
+
+    /**
+     * Attaches all listeners needed for the searchBar.
+     *
+     * @method attachSearchBarListeners
+     */
+    attachSearchBarListeners () {
+        document.getElementById("searchForm").addEventListener("submit", this.showSearchMemes.bind(this));
+        document.getElementById("searchForm").addEventListener("change", this.showSearchMemes.bind(this));
+        document.getElementById("searchForm").addEventListener("keyup", this.showSearchMemes.bind(this));
+    },
+
+    /**
+     * Attaches all listeners needed for the meme category buttons.
+     *
+     * @method attachMemeCategoryButtonListeners
+     */
+    attachMemeCategoryButtonListeners () {
+        document.getElementById("category-bestOf").addEventListener("click", this.showBestOfMemes.bind(this));
+        document.getElementById("category-images").addEventListener("click", this.showImageMemes.bind(this));
+        document.getElementById("category-videos").addEventListener("click", this.showVideoMemes.bind(this));
+        document.getElementById("category-sounds").addEventListener("click", this.showSoundMemes.bind(this));
+    },
+
+    /**
+     * Attaches all listeners needed for the signupModal.
+     *
+     * @method attachSignupModalListeners
+     */
+    attachSignupModalListeners () {
+        document.getElementById("signupModalButton").addEventListener("click", this.toggleSignupModal);
+        document.getElementById("signupModalCloseButton").addEventListener("click", this.toggleSignupModal);
+        document.getElementById("signupForm").addEventListener("submit", this.signup.bind(this));
+        document.getElementById("loginForm").addEventListener("submit", this.login.bind(this));
     }
 }
 

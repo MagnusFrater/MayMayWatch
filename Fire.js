@@ -26,20 +26,16 @@ const Fire = {
         firebase.auth().onAuthStateChanged(function(user) {
             if (user) {
                 // user is signed in.
-                console.log("User is signed in.");
+                console.log("Fire: User is signed in.");
 
                 // call onSignInCallback if it exists
-                if (onSignInCallback) {
-                    onSignInCallback();
-                }
+                if (onSignInCallback) onSignInCallback();
             } else {
                 // user is signed out
-                console.log("User is signed out.");
+                console.log("Fire: User is signed out.");
 
                 // call onSignOutCallback if it exists
-                if (onSignOutCallback) {
-                    onSignOutCallback();
-                }
+                if (onSignOutCallback) onSignOutCallback();
             }
         });
     },
@@ -47,26 +43,28 @@ const Fire = {
     /**
      * Signs a user up via email/password auth.
      *
-     * @method signUpEmail
+     * @method signUpEmailPassword
      * 
      * @param {string} email - sign up email
      * @param {string} password - sign up password
      * @param {string} repassword - reentered sign up password
      * @param {boolean} showAlert - (OPTIONAL) show errorMessage as alert
      */
-    signUpEmail (email, password, repassword, showAlert) {
+    signUpEmailPassword (email, password, repassword, showAlert) {
         // check if given signUpEmail credentials are valid
-        if (areSignUpCredentialsValid(email, password, repassword, showAlert)) {
+        if (Fire.areEmailPasswordSignUpCredentialsValid(email, password, repassword, showAlert)) {
 
             // create new user via email/password auth
             firebase.auth().createUserWithEmailAndPassword(email, password)
                 .catch(function(error) {
                     // get error message
-                    const errorMessage = error.code + ": " + error.message;
+                    const errorMessage = "Fire: " + error.code + ": " + error.message;
 
                     // print error message
-                    console.exception(errorMessage);
-                    alert("Failure to sign up!");
+                    console.log("Fire: Failure to signup via email/password authentication!");
+                    console.log(errorMessage);
+
+                    if (showAlert) alert("Failure to sign up!");
                 }
             );
         }
@@ -75,15 +73,15 @@ const Fire = {
     /**
      * Checks to see if email sign up credentials are valid.
      *
-     * @method areEmailSignUpCredentialsValid
+     * @method areEmailPasswordSignUpCredentialsValid
      *
      * @param {string} email - sign up email
      * @param {string} password - sign up password
      * @param {string} repassword - reentered sign up password
      * @param {boolean} showAlert - (OPTIONAL) show errorMessage as alert
      */
-    areEmailSignUpCredentialsValid (email, password, repassword, showAlert) {
-        let errorMessage;
+    areEmailPasswordSignUpCredentialsValid (email, password, repassword, showAlert) {
+        let errorMessage = null;
 
         // email
         if (!email) {
@@ -118,13 +116,13 @@ const Fire = {
 
         // handle errorMessage
         if (errorMessage) {
+            errorMessage = "Fire: " + errorMessage;
+
             // print errorMessage to console
-            console.exception(errorMessage);
+            console.log(errorMessage);
 
             // show alert only is specified
-            if (showAlert) {
-                alert(errorMessage);
-            }
+            if (showAlert) alert(errorMessage);
 
             // credentials invalid
             return false;
@@ -137,31 +135,43 @@ const Fire = {
     /**
      * Logs in a user via email/password auth.
      *
-     * @method loginEmail
+     * @method loginEmailPassword
      * 
      * @param {string} email - login email
      * @param {string} password - login password
      * @param {boolean} showAlert - (OPTIONAL) show errorMessage as alert
      */
-    loginEmail (email, password, showAlert) {
+    loginEmailPassword (email, password, showAlert) {
         // check if given loginEmail credentials are valid
-        if (areEmailLoginCredentialsValid(email, password, showAlert)) {
+        if (Fire.areEmailPasswordLoginCredentialsValid(email, password, showAlert)) {
             // create new user via email/password auth
-            //TODO
+
+            firebase.auth().signInWithEmailAndPassword(email, password)
+                .catch(function(error) {
+                    // get error message
+                    const errorMessage = "Fire: " + error.code + ": " + error.message;
+
+                    // print error message
+                    console.log("Fire: Failure to login via email/password authentication!");
+                    console.log(errorMessage);
+
+                    if (showAlert) alert("Failure to login!");
+                }
+            );
         }
     },
 
     /**
      * Checks to see if email login credentials are valid.
      *
-     * @method areEmailLoginCredentialsValid
+     * @method areEmailPasswordLoginCredentialsValid
      *
      * @param {string} email - sign up email
      * @param {string} password - sign up password
      * @param {boolean} showAlert - (OPTIONAL) show errorMessage as alert
      */
-    areEmailLoginCredentialsValid (email, password, showAlert) {
-        let errorMessage;
+    areEmailPasswordLoginCredentialsValid (email, password, showAlert) {
+        let errorMessage = null;
 
         // email
         if (!email) {
@@ -183,13 +193,13 @@ const Fire = {
 
         // handle errorMessage
         if (errorMessage) {
+            errorMessage = "Fire: " + errorMessage;
+
             // print errorMessage to console
-            console.exception(errorMessage);
+            console.log(errorMessage);
 
             // show alert only is specified
-            if (showAlert) {
-                alert(errorMessage);
-            }
+            if (showAlert) alert(errorMessage);
 
             // credentials invalid
             return false;
@@ -200,36 +210,11 @@ const Fire = {
     },
 
     /**
-     * Logs out a user.
+     * Logs a user out.
      *
      * @method logout
      */
     logout () {
 
     }
-}
-
-// TAKE THIS SHIT OUTTA HERE
-
-// add a new meme to the database
-function addNewMeme (category, meme) {
-    const memeRef = firebase.database().ref('memes/' + category + "/" + meme.name);
-
-    memeRef.set({
-        rating: meme.rating
-    });
-}
-
-// sets the meme listener to a specific category
-function setMemeListener (category) {
-    const categoryRef = firebase.database().ref('memes/' + category);
-
-    categoryRef.on('value', function(snapshot) {
-        getMemes();
-    });
-}
-
-// get memes from firebase realtime database
-function getMemes (snapshot) {
-    
 }

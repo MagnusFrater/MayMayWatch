@@ -85,14 +85,14 @@ li {
 }
 
 /* SIGNUP BUTTON*/
-#signupButton {
+#signupModalButton {
     position: fixed;
     top: 1em;
     right: 1em;
     color: black;
 }
 
-#signupButton:hover {
+#signupModalButton:hover {
     color: grey;
 }
 
