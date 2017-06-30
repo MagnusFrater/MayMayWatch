@@ -213,8 +213,26 @@ const Fire = {
      * Logs a user out.
      *
      * @method logout
+     * 
+     * @param {callback} onLogoutSuccessCallback - (OPTIONAL) callback called on successful logout
+     * @param {callback} onLogoutErrorCallback - (OPTIONAL) callback called on failed logout
+     * @param {callback} showAlert - (OPTIONAL) show errorMessage as alert
      */
-    logout () {
+    logout (onLogoutSuccessCallback, onLogoutErrorCallback, showAlert) {
+        firebase.auth().signOut().then(function() {
+            // Sign-out successful.
+            if (onLogoutSuccessCallback) onLogoutSuccessCallback();
+        }).catch(function(error) {
+            // get error message
+            const errorMessage = "Fire: " + error.code + ": " + error.message;
 
+            // print error message
+            console.log("Fire: Failure to logout");
+            console.log(errorMessage);
+
+            if (showAlert) alert("Failure to logout!");
+
+            if (onLogoutErrorCallback) onLogoutErrorCallback();
+        });
     }
 }

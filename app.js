@@ -26,7 +26,7 @@ const app = {
 
         // initialize firebase
         Fire.init(config);
-        Fire.createAuthStateListener(this.signinCallback, this.signoutCallback);
+        Fire.createAuthStateListener(this.signinCallback.bind(this), this.signoutCallback.bind(this));
     },
 
     /**
@@ -593,8 +593,6 @@ const app = {
             // hide signupModal
             modal.style.display = "none";
         }
-
-        console.log("modal this");
     },
 
     /**
@@ -657,6 +655,29 @@ const app = {
     },
 
     /**
+     * If user is signed in, #signupModal should only show logout button.
+     * If User is signed out, #signupModal should show both login/signup forms.
+     *
+     * @method setSignupModal
+     */
+    setSignupModal () {
+        // modal.style.display = "block";
+        
+        // get necessary elements
+        const loginSignupDiv = document.getElementById("signupModalForms");
+        const logoutDiv = document.getElementById("signupModalLogoutDiv");
+
+        // toggle the divs as needed
+        if (normie.loggedIn) {
+            loginSignupDiv.style.display = "none";
+            logoutDiv.style.display = "block";
+        } else {
+            loginSignupDiv.style.display = "block";
+            logoutDiv.style.display = "none";
+        }
+    },
+
+    /**
      * Handles what happens when a user signs in.
      *
      * @method signinCallback
@@ -664,6 +685,9 @@ const app = {
     signinCallback () {
         // set normie to logged in
         normie.loggedIn = true;
+
+        // makes sure #signupModal shows the correct forms
+        this.setSignupModal();
     },
 
     /**
@@ -674,6 +698,9 @@ const app = {
     signoutCallback () {
         // set normie to logged out
         normie.loggedIn = false;
+
+        // makes sure #signupModal shows the correct forms
+        this.setSignupModal();
     },
 
     /**
@@ -692,7 +719,10 @@ const app = {
         const password = form.password.value;
         const repassword = form.repassword.value;
 
-        console.log(email + " " + password + " " + repassword);
+        // clear the form
+        form.email.value = "";
+        form.password.value = "";
+        form.repassword.value = "";
 
         // attempt signup
         Fire.signUpEmailPassword(email, password, repassword, true);
@@ -716,8 +746,30 @@ const app = {
         const email = form.email.value;
         const password = form.password.value;
 
+        // clear the form
+        form.email.value = "";
+        form.password.value = "";
+
         // attempt login
         Fire.loginEmailPassword(email, password, true);
+
+        // close the signupModal
+        this.toggleSignupModal(false);
+    },
+
+    /**
+     * Logs user out of firebase.
+     *
+     * @method logout
+     */
+    logout (ev) {
+        ev.preventDefault();
+
+        // get the form
+        const form = ev.target;
+
+        // attempt logout
+        Fire.logout();
 
         // close the signupModal
         this.toggleSignupModal(false);
@@ -780,10 +832,16 @@ const app = {
      * @method attachSignupModalListeners
      */
     attachSignupModalListeners () {
+        // general
         document.getElementById("signupModalButton").addEventListener("click", this.toggleSignupModal);
         document.getElementById("signupModalCloseButton").addEventListener("click", this.toggleSignupModal);
+
+        // login/signup
         document.getElementById("signupForm").addEventListener("submit", this.signup.bind(this));
         document.getElementById("loginForm").addEventListener("submit", this.login.bind(this));
+
+        // logout
+        document.getElementById("logoutForm").addEventListener("submit", this.logout.bind(this));
     }
 }
 

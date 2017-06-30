@@ -22,7 +22,7 @@
                 <h1 id="siteHeader">MayMayWatch</h1>
 
                 <!-- search bar -->
-                <form id="searchForm" class="grid-x">
+                <form id="searchForm" class="grid-x" autocomplete="on">
                     <!-- meme name -->
                     <input id="searchBar" type="text" class="input-group-field" name="searchBar" placeholder="Search memes">
                 </form>
@@ -38,7 +38,7 @@
                 <br id="category-break">
 
                 <!-- Form for adding memes -->
-                <form id="addMemeForm">
+                <form id="addMemeForm" autocomplete="off">
                     <div class="input-group">
                         <!-- meme name -->
                         <input type="text" class="input-group-field" name="memeName" placeholder="Enter meme">
@@ -82,14 +82,16 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
 
+                <!-- login/signup forms -->
                 <div id="signupModalForms">
+                    <!-- login content -->
                     <div id="signupModalLoginContent" class="modalLeft">
                         <h1 class="text-center">Login</h1>
 
                         <br>
 
                         <!-- login form -->
-                        <form id="loginForm">
+                        <form id="loginForm" autocomplete="off">
                             <input type="text" class="input-group-field" name="email" placeholder="Email">
                             <input type="password" class="input-group-field" name="password" placeholder="Password">
                         
@@ -101,13 +103,14 @@
 
                     <div class="verticalDivider"></div>
 
+                    <!-- signup content -->
                     <div id="signupModalSignupContent" class="modalRight">
                         <h1 class="text-center">Sign Up</h1>
 
                         <br>
                         
                         <!-- signup form -->
-                        <form id="signupForm">
+                        <form id="signupForm" autocomplete="off">
                             <input type="text" class="input-group-field" name="email" placeholder="Email">
                             <input type="password" class="input-group-field" name="password" placeholder="Password">
                             <input type="password" class="input-group-field" name="repassword" placeholder="Re-enter Password">
@@ -117,6 +120,15 @@
                             </div>
                         </form>
                     </div>
+                </div>
+
+                <!-- logout div -->
+                <div id="signupModalLogoutDiv">
+                    <form id="logoutForm">
+                        <div class="input-group-button">
+                                <button id="logoutButton" class="success button" type="submit">Logout</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
