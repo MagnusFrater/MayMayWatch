@@ -19,7 +19,6 @@ const app = {
     init () {
         // general
         this.setSelectedMemeCategory("bestof");
-        this.setAdminStatus(true);
 
         // attach listeners
         this.attachAllListeners();
@@ -35,8 +34,8 @@ const app = {
      * @method setAdminStatus
      */
     setAdminStatus (status) {
-        isAdmin = status;
-        this.toggleAddMemeForm(status);
+        normie.isAdmin = status;
+        this.toggleAddMemeForm(normie.isAdmin);
         this.refreshMemeList();
     },
 
@@ -350,10 +349,12 @@ const app = {
 
         memeListItem.appendChild(this.createMemeRatingLabel(meme));
         memeListItem.appendChild(this.createMemeNameLabel(meme));
-        memeListItem.appendChild(this.createUpdootMemeButton(meme));
-        memeListItem.appendChild(this.createDowndootMemeButton(meme));
-        memeListItem.appendChild(this.createFavouriteMemeButton(meme));
-        if (isAdmin) memeListItem.appendChild(this.createRemoveMemeButton(meme));
+        if (normie.loggedIn) {
+            memeListItem.appendChild(this.createUpdootMemeButton(meme));
+            memeListItem.appendChild(this.createDowndootMemeButton(meme));
+            memeListItem.appendChild(this.createFavouriteMemeButton(meme));
+            if (normie.isAdmin) memeListItem.appendChild(this.createRemoveMemeButton(meme));
+        }
 
         // return finished <li>
         return memeListItem;
@@ -683,8 +684,9 @@ const app = {
      * @method signinCallback
      */
     signinCallback () {
-        // set normie to logged in
+        // update normie
         normie.loggedIn = true;
+        this.setAdminStatus(true);
 
         // makes sure #signupModal shows the correct forms
         this.setSignupModal();
@@ -698,6 +700,7 @@ const app = {
     signoutCallback () {
         // set normie to logged out
         normie.loggedIn = false;
+        this.setAdminStatus(false);
 
         // makes sure #signupModal shows the correct forms
         this.setSignupModal();
