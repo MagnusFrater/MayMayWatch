@@ -294,6 +294,17 @@ const Fire = {
     },
 
     /**
+     * Returns current user's uid.
+     *
+     * @method getUserId
+     * 
+     * @return {string} - current user's uid
+     */
+    getUserId () {
+        return firebase.auth().currentUser.uid;
+    },
+
+    /**
      * Returns Firebase realtime database reference.
      *
      * @method getDatabase
@@ -301,6 +312,6 @@ const Fire = {
      * @return {DatabaseReference} - Firebase realtime database reference
      */
     getDatabase () {
-        return firebase.database();
+        return firebase.database().ref();
     }
 }

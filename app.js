@@ -718,17 +718,25 @@ const app = {
         const form = ev.target;
 
         // sign up credentials
+        const username = form.username.value;
         const email = form.email.value;
         const password = form.password.value;
         const repassword = form.repassword.value;
 
+        // check to make sure username isn't empty
+        if (username.length < 1 || username.length > 20) {
+            alert("Username is invalid!");
+            return;
+        }
+
         // clear the form
+        form.username.value = "";
         form.email.value = "";
         form.password.value = "";
         form.repassword.value = "";
 
         // attempt signup
-        Fire.signUpEmailPassword(email, password, repassword, null, null);
+        Fire.signUpEmailPassword(email, password, repassword, app.signupSuccessCallback(username), app.signupErrorCallback);
 
         // close the signupModal
         this.toggleSignupModal(false);
@@ -754,7 +762,7 @@ const app = {
         form.password.value = "";
 
         // attempt login
-        Fire.loginEmailPassword(email, password, null, null);
+        Fire.loginEmailPassword(email, password, app.loginSuccessCallback, app.loginErrorCallback);
 
         // close the signupModal
         this.toggleSignupModal(false);
@@ -772,10 +780,142 @@ const app = {
         const form = ev.target;
 
         // attempt logout
-        Fire.logout(null, null);
+        Fire.logout(app.logoutSuccessCallback, app.logoutErrorCallback);
 
         // close the signupModal
         this.toggleSignupModal(false);
+    },
+
+    /**
+     * Handles a successful Firebase signup.
+     *
+     * @method signupSuccessCallback
+     * 
+     * @param {string} username - username
+     */
+    signupSuccessCallback (username) {
+        console.log("Signed up.");
+
+        const reference = Fire.getDatabase().child("normies").child(Fire.getUserId());
+        const data = {
+            isAdmin: false,
+            username: username,
+            likes: {},
+            dislikes: {},
+            favourites: {}
+        }
+
+        // write new firebase database info for new normie (user)
+        Fire.write(reference, data, app.firebaseWriteSuccessCallback, app.firebaseWriteErrorCallback);
+    },
+
+    /**
+     * Handles a Firebase signup error.
+     *
+     * @method signupErrorCallback
+     */
+    signupErrorCallback () {
+        alert("Sign Up Failure!");
+        
+        Fire.logout(app.logoutSuccessCallback, app.logoutErrorCallback);
+    },
+
+    /**
+     * Handles a successful Firebase login.
+     *
+     * @method logoutSuccessCallback
+     */
+    loginSuccessCallback () {
+        console.log("Logged in.");
+
+        const reference = Fire.getDatabase().child("normies").child(Fire.getUserId());
+                
+        // get normie details from firebase database
+        Fire.read(reference, app.firebaseReadSuccessCallback, app.firebaseReadErrorCallback);
+    },
+
+    /**
+     * Handles a Firebase login error.
+     *
+     * @method loginErrorCallback
+     */
+    loginErrorCallback () {
+        console.log("Error logging in.");
+        alert("Login failure!");
+    },
+
+    /**
+     * Handles a successful Firebase logout.
+     *
+     * @method logoutSuccessCallback
+     */
+    logoutSuccessCallback () {
+        console.log("Logged out.");
+
+        // reset normie
+        normie.reset();
+    },
+
+    /**
+     * Handles a Firebase logout error.
+     *
+     * @method logoutErrorCallback
+     */
+    logoutErrorCallback () {
+        console.log("Error logging out.");
+    },
+
+    /**
+     * Handles a successful Fire.write().
+     *
+     * @method firebaseWriteSuccessCallback
+     */
+    firebaseWriteSuccessCallback () {
+        console.log("Wrote new user data.")
+    },
+
+    /**
+     * Handles a Fire.write() error.
+     *
+     * @method firebaseWriteErrorCallback
+     */
+    firebaseWriteErrorCallback () {
+        console.log("Error writing new user data. Logging out.");
+
+        // log user out
+        Fire.logout(app.logoutSuccessCallback, app.logoutErrorCallback);
+    },
+
+    /**
+     * Handles a successful Fire.read().
+     *
+     * @method firebaseReadSuccessCallback
+     */
+    firebaseReadSuccessCallback () {
+        // reset normie
+        normie.isAdmin = snapshot.val().isAdmin;
+        normie.username = snapshot.val().username;
+        normie.likes = snapshot.val().likes;
+        normie.dislikes = snapshot.val().dislikes;
+        normie.favourites = snapshot.val().favourites;
+
+        // refresh necessary page elements
+        app.setSelectedMemeCategory("bestof");
+        app.setAdminStatus(normie.isAdmin);
+        app.refreshMemeList();
+
+        console.log("Successfully read data.");
+    },
+
+    /**
+     * Handles a Fire.read() error.
+     *
+     * @method firebaseReadErrorCallback
+     */
+    firebaseReadErrorCallback () {
+        console.log("Error reading user data.");
+
+        Fire.logout(app.logoutSuccessCallback, app.logoutErrorCallback);
     },
 
     /**
