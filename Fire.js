@@ -1,6 +1,6 @@
 const Fire = {
     /**
-     * Initializes firebase.
+     * Initializes Firebase.
      *
      * @method initFirebase
      * 
@@ -255,11 +255,11 @@ const Fire = {
     },
 
     /**
-     * Reads data from Firebase realtime database (once).
+     * Reads data from realtime database (once).
      *
      * @method read
      * 
-     * @param {DatabaseReference} reference - Firebase realtime database reference
+     * @param {DatabaseReference} reference - realtime database reference
      * @param {callback} onReadCallback - callback for read success; returns snapshot as parameter
      * @param {callback} onErrorCallback - (OPTIONAL) callback for read error; returns error as parameter
      */
@@ -283,14 +283,55 @@ const Fire = {
      * @param {DatabaseReference} reference - realtime database reference
      * @param {callback} onChangeCallback - callback for data change at reference; returns reference snapshot as parameter
      * @param {callback} onErrorCallback - (OPTIONAL) callback for listen error; returns error as parameter
+     * 
+     * @return {DatabaseListener} - database listener at specified database reference
      */
     listen (reference, onChangeCallback, onErrorCallback) {
-        reference.on("value", function(snapshot) {
-            onChangeCallback(snapshot);
-        })
-        .catch(function (error) {
-            if (onErrorCallback) onErrorCallback(error);
-        });
+        return reference.on("value", 
+            function (snapshot) {
+                onChangeCallback(snapshot);
+            })
+            .catch (function (error) {
+                if (onErrorCallback) onErrorCallback(error);
+            });
+    },
+
+    /**
+     * Removes listener at specified realtime database reference.
+     *
+     * @method listen
+     * 
+     * @param {DatabaseReference} reference - realtime database reference
+     * @param {callback} onSuccessCallback - (OPTIONAL) callback on successful database listener removal
+     * @param {callback} onErrorCallback - (OPTIONAL) callback on database listener removal error; returns error as parameter
+     */
+    stop (reference, onSuccessCallback, onErrorCallback) {
+        reference.off()
+            .then (function () {
+                if (onSuccessCallback) onSuccessCallback();
+            })
+            .catch (function (error) {
+                if (onErrorCallback) onErrorCallback(error);
+            })
+    },
+
+    /**
+     * Removes data at specified realtime database reference.
+     *
+     * @method listen
+     * 
+     * @param {DatabaseReference} reference - realtime database reference
+     * @param {callback} onSuccessCallback - (OPTIONAL) callback on successful reference removal
+     * @param {callback} onErrorCallback - (OPTIONAL) callback on reference removal error; returns error as parameter
+     */
+    remove (reference, onSuccessCallback, onErrorCallback) {
+        reference.remove()
+            .then (function () {
+                if (onSuccessCallback) onSuccessCallback();
+            })
+            .catch (function (error) {
+                if (onErrorCallback) onErrorCallback(error);
+            });
     },
 
     /**
@@ -305,11 +346,11 @@ const Fire = {
     },
 
     /**
-     * Returns Firebase realtime database reference.
+     * Returns realtime database reference.
      *
      * @method getDatabase
      * 
-     * @return {DatabaseReference} - Firebase realtime database reference
+     * @return {DatabaseReference} - realtime database reference
      */
     getDatabase () {
         return firebase.database().ref();
