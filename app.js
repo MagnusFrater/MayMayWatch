@@ -728,7 +728,7 @@ const app = {
         form.repassword.value = "";
 
         // attempt signup
-        Fire.signUpEmailPassword(email, password, repassword, true);
+        Fire.signUpEmailPassword(email, password, repassword, null, null);
 
         // close the signupModal
         this.toggleSignupModal(false);
@@ -754,7 +754,7 @@ const app = {
         form.password.value = "";
 
         // attempt login
-        Fire.loginEmailPassword(email, password, true);
+        Fire.loginEmailPassword(email, password, null, null);
 
         // close the signupModal
         this.toggleSignupModal(false);
@@ -772,7 +772,7 @@ const app = {
         const form = ev.target;
 
         // attempt logout
-        Fire.logout();
+        Fire.logout(null, null);
 
         // close the signupModal
         this.toggleSignupModal(false);

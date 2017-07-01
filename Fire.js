@@ -1,13 +1,10 @@
-// listeners
-let memeListener;
-
 const Fire = {
     /**
      * Initializes firebase.
      *
      * @method initFirebase
      * 
-     * @param {object} config - firebase config 
+     * @param {object} config - Firebase config 
      */
     init (config) {
         firebase.initializeApp(config);
@@ -18,23 +15,17 @@ const Fire = {
      *
      * @method createAuthStateListener
      * 
-     * @param {callback} onSignInCallback - (OPTIONAL) callback called on user sign in (auth)
-     * @param {callback} onSignOutCallback - (OPTIONAL) callback called on user sign out (unauth)
+     * @param {callback} onSignInCallback - (OPTIONAL) callback for user authenticated; returns Firebase user as parameter
+     * @param {callback} onSignOutCallback - (OPTIONAL) callback for user un-authenticated
      */
     createAuthStateListener (onSignInCallback, onSignOutCallback) {
         // set auth state changed listener 
         firebase.auth().onAuthStateChanged(function(user) {
             if (user) {
-                // user is signed in.
-                console.log("Fire: User is signed in.");
-
-                // call onSignInCallback if it exists
-                if (onSignInCallback) onSignInCallback();
+                // user authenticated
+                if (onSignInCallback) onSignInCallback(user);
             } else {
-                // user is signed out
-                console.log("Fire: User is signed out.");
-
-                // call onSignOutCallback if it exists
+                // user un-authenticated
                 if (onSignOutCallback) onSignOutCallback();
             }
         });
@@ -48,15 +39,20 @@ const Fire = {
      * @param {string} email - sign up email
      * @param {string} password - sign up password
      * @param {string} repassword - reentered sign up password
-     * @param {boolean} showAlert - (OPTIONAL) show errorMessage as alert
+     * @param {callback} onSuccessCallback - callback for signup success; returns Firebase user as parameter
+     * @param {callback} onErrorCallback - (OPTIONAL) callback for signup error; returns error as parameter
      */
-    signUpEmailPassword (email, password, repassword, showAlert) {
+    signUpEmailPassword (email, password, repassword, onSuccessCallback, onErrorCallback) {
         // check if given signUpEmail credentials are valid
-        if (Fire.areEmailPasswordSignUpCredentialsValid(email, password, repassword, showAlert)) {
+        if (Fire.areEmailPasswordSignUpCredentialsValid(email, password, repassword)) {
 
             // create new user via email/password auth
             firebase.auth().createUserWithEmailAndPassword(email, password)
-                .catch(function(error) {
+                .then(function (user) {
+                    // successful sign up
+                    if (onSuccessCallback) onSuccessCallback(user);
+                })
+                .catch(function (error) {
                     // get error message
                     const errorMessage = "Fire: " + error.code + ": " + error.message;
 
@@ -64,9 +60,11 @@ const Fire = {
                     console.log("Fire: Failure to signup via email/password authentication!");
                     console.log(errorMessage);
 
-                    if (showAlert) alert("Failure to sign up!");
-                }
-            );
+                    if (onErrorCallback) onErrorCallback(error);
+                });
+        } else {
+            // sign up credentials invalid
+            if (onErrorCallback) onErrorCallback();
         }
     },
 
@@ -78,9 +76,8 @@ const Fire = {
      * @param {string} email - sign up email
      * @param {string} password - sign up password
      * @param {string} repassword - reentered sign up password
-     * @param {boolean} showAlert - (OPTIONAL) show errorMessage as alert
      */
-    areEmailPasswordSignUpCredentialsValid (email, password, repassword, showAlert) {
+    areEmailPasswordSignUpCredentialsValid (email, password, repassword) {
         let errorMessage = null;
 
         // email
@@ -121,9 +118,6 @@ const Fire = {
             // print errorMessage to console
             console.log(errorMessage);
 
-            // show alert only is specified
-            if (showAlert) alert(errorMessage);
-
             // credentials invalid
             return false;
         } else {
@@ -139,15 +133,20 @@ const Fire = {
      * 
      * @param {string} email - login email
      * @param {string} password - login password
-     * @param {boolean} showAlert - (OPTIONAL) show errorMessage as alert
+     * @param {callback} onSuccessCallback - callback for login success; returns Firebase user as parameter
+     * @param {callback} onErrorCallback - (OPTIONAL) callback for login error; returns error as parameter
      */
-    loginEmailPassword (email, password, showAlert) {
+    loginEmailPassword (email, password, onSuccessCallback, onErrorCallback) {
         // check if given loginEmail credentials are valid
-        if (Fire.areEmailPasswordLoginCredentialsValid(email, password, showAlert)) {
+        if (Fire.areEmailPasswordLoginCredentialsValid(email, password)) {
+            
             // create new user via email/password auth
-
             firebase.auth().signInWithEmailAndPassword(email, password)
-                .catch(function(error) {
+                .then(function (user) {
+                    // successful login
+                    if (onSuccessCallback) onSuccessCallback(user);
+                })
+                .catch(function (error) {
                     // get error message
                     const errorMessage = "Fire: " + error.code + ": " + error.message;
 
@@ -155,9 +154,11 @@ const Fire = {
                     console.log("Fire: Failure to login via email/password authentication!");
                     console.log(errorMessage);
 
-                    if (showAlert) alert("Failure to login!");
-                }
-            );
+                    if (onErrorCallback) onErrorCallback(error);
+                });
+        } else {
+            // login credentials invalid
+            if (onErrorCallback) onErrorCallback();
         }
     },
 
@@ -168,9 +169,8 @@ const Fire = {
      *
      * @param {string} email - sign up email
      * @param {string} password - sign up password
-     * @param {boolean} showAlert - (OPTIONAL) show errorMessage as alert
      */
-    areEmailPasswordLoginCredentialsValid (email, password, showAlert) {
+    areEmailPasswordLoginCredentialsValid (email, password) {
         let errorMessage = null;
 
         // email
@@ -198,9 +198,6 @@ const Fire = {
             // print errorMessage to console
             console.log(errorMessage);
 
-            // show alert only is specified
-            if (showAlert) alert(errorMessage);
-
             // credentials invalid
             return false;
         } else {
@@ -214,25 +211,96 @@ const Fire = {
      *
      * @method logout
      * 
-     * @param {callback} onLogoutSuccessCallback - (OPTIONAL) callback called on successful logout
-     * @param {callback} onLogoutErrorCallback - (OPTIONAL) callback called on failed logout
-     * @param {callback} showAlert - (OPTIONAL) show errorMessage as alert
+     * @param {callback} onSuccessCallback - (OPTIONAL) callback for logout success
+     * @param {callback} onErrorCallback - (OPTIONAL) callback for logout error; returns error as parameter
      */
-    logout (onLogoutSuccessCallback, onLogoutErrorCallback, showAlert) {
-        firebase.auth().signOut().then(function() {
-            // Sign-out successful.
-            if (onLogoutSuccessCallback) onLogoutSuccessCallback();
-        }).catch(function(error) {
-            // get error message
-            const errorMessage = "Fire: " + error.code + ": " + error.message;
+    logout (onSuccessCallback, onErrorCallback) {
+        firebase.auth().signOut()
+            .then(function () {
+                // successful logout
+                if (onSuccessCallback) onSuccessCallback();
+            })
+            .catch(function (error) {
+                // get error message
+                const errorMessage = "Fire: " + error.code + ": " + error.message;
 
-            // print error message
-            console.log("Fire: Failure to logout");
-            console.log(errorMessage);
+                // print error message
+                console.log("Fire: Failure to logout");
+                console.log(errorMessage);
 
-            if (showAlert) alert("Failure to logout!");
+                if (onErrorCallback) onErrorCallback(error);
+            });
+    },
 
-            if (onLogoutErrorCallback) onLogoutErrorCallback();
+    /**
+     * Writes data to a database reference.
+     *
+     * @method write
+     * 
+     * @param {DatabaseReference} reference - realtime database reference
+     * @param {object} data - information to write to reference
+     * @param {callback} onSuccessCallback - (OPTIONAL) callback for write success; returns new reference as parameter
+     * @param {callback} onErrorCallback - (OPTIONAL) callback for write error; returns error as parameter
+     */
+    write (reference, data, onSuccessCallback, onErrorCallback) {
+        reference.set(data)
+            .then(function (ref) {
+                // successful write
+                if (onSuccessCallback) onSuccessCallback(ref);
+            })
+            .catch(function (error) {
+                // write error
+                if (onErrorCallback) onErrorCallback(error);
+            });
+    },
+
+    /**
+     * Reads data from Firebase realtime database (once).
+     *
+     * @method read
+     * 
+     * @param {DatabaseReference} reference - Firebase realtime database reference
+     * @param {callback} onReadCallback - callback for read success; returns snapshot as parameter
+     * @param {callback} onErrorCallback - (OPTIONAL) callback for read error; returns error as parameter
+     */
+    read (reference, onReadCallback, onErrorCallback) {
+        return reference.once("value")
+            .then(function(snapshot) {
+                //successful read
+                onReadCallback(snapshot);
+            })
+            .catch(function (error) {
+                // read error
+                if (onErrorCallback) onErrorCallback(error);
+            });
+    },
+
+    /**
+     * Listens for data changes at specified realtime database reference.
+     *
+     * @method listen
+     * 
+     * @param {DatabaseReference} reference - realtime database reference
+     * @param {callback} onChangeCallback - callback for data change at reference; returns reference snapshot as parameter
+     * @param {callback} onErrorCallback - (OPTIONAL) callback for listen error; returns error as parameter
+     */
+    listen (reference, onChangeCallback, onErrorCallback) {
+        reference.on("value", function(snapshot) {
+            onChangeCallback(snapshot);
+        })
+        .catch(function (error) {
+            if (onErrorCallback) onErrorCallback(error);
         });
+    },
+
+    /**
+     * Returns Firebase realtime database reference.
+     *
+     * @method getDatabase
+     * 
+     * @return {DatabaseReference} - Firebase realtime database reference
+     */
+    getDatabase () {
+        return firebase.database();
     }
 }
