@@ -736,7 +736,7 @@ const app = {
         form.repassword.value = "";
 
         // attempt signup
-        Fire.signUpEmailPassword(email, password, repassword, app.signupSuccessCallback(username), app.signupErrorCallback);
+        Fire.signUpEmailPassword(email, password, repassword, app.signupSuccessCallback.bind(this, username), app.signupErrorCallback);
 
         // close the signupModal
         this.toggleSignupModal(false);
