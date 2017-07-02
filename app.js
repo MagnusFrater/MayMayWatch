@@ -232,15 +232,11 @@ const app = {
         }
 
         // construct meme
-        const meme = {
-            id: this.memeCount,
-            name: form.memeName.value,
-            rating: 0,
-            favourite: -1,
-            category: "",
-            reference: form.memeReference.value,
-            resource: form.memeResource.value
-        };
+        const name = form.memeName.value;
+        const reference = form.memeReference.value;
+        const resource = form.memeResource.value;
+
+        const meme = new Meme (name, "", 0, reference, resource);
 
         // add image category to meme if checked
         if (form.imageCheckbox.checked) {
@@ -262,6 +258,9 @@ const app = {
 
         // add meme to app.memes
         memes.push(meme);
+
+        // write meme to Firebase's realtime database
+        this.addMeme(meme);
 
         // refresh #memeList
         this.refreshMemeList();
@@ -1028,6 +1027,76 @@ const app = {
         console.log(error.code + ": " + error.message);
 
         alert("Failure to delete user account!");
+    },
+
+    /**
+     * Handles adding a meme to Firebase's realtime database
+     *
+     * @method addMeme
+     * 
+     * @param {object} meme - meme to add to Firebase's realtime database
+     */
+    addMeme (meme) {
+        // first double check if a user isAdmin
+        const reference = Fire.getDatabase().child("normies").child(Fire.getUserId());
+
+        Fire.read(reference, function (snapshot) {
+            // get user's isAdmin value
+            const isAdmin = snapshot.val().isAdmin;
+
+            if (isAdmin) {
+                // isAdmin, allowed to write meme to database
+                const reference = Fire.getDatabase().child("memes").child(meme.name);
+
+                // get only needed meme data from meme
+                const memeData = {
+                    name: meme.name,
+                    category: meme.category,
+                    rating: meme.rating,
+                    reference: meme.reference,
+                    resource: meme.resource
+                };
+
+                Fire.write(reference, memeData, app.addMemeWriteSuccessCallback, app.addMemeWriteErrorCallback);
+
+            } else {
+                // not an admin
+                console.log("Add meme disallowed; not an admin.");
+
+                alert("Can't add meme; not an admin!");
+            }
+        }, app.addMemeIsAdminCheckErrorCallback);
+    },
+
+    /**
+     * Handles a Fire.read() error on addMeme isAdmin check.
+     *
+     * @method addMemeIsAdminCheckErrorCallback
+     */
+    addMemeIsAdminCheckErrorCallback (error) {
+        console.log("Error checking user's isAdmin value.");
+        console.log(error.code + ": " + error.message);
+    },
+
+    /**
+     * Handles a successful Fire.write() on addMeme.
+     *
+     * @method addMemeWriteSuccessCallback
+     */
+    addMemeWriteSuccessCallback () {
+        console.log("Successfully added meme to Firebase's realtime database.");
+    },
+
+    /**
+     * Handles a Fire.write() error on addMeme.
+     *
+     * @method addMemeWriteErrorCallback
+     */
+    addMemeWriteErrorCallback (error) {
+        console.log("Failed to write meme to Firebase's realtime database.");
+        console.log(error.code + ": " + error.message);
+
+        alert("Error adding meme!");
     },
 
     /**
