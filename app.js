@@ -724,16 +724,40 @@ const app = {
     removeMeme () {
         // get meme data
         const memeName = this.dataset.meme;
-        const meme = memes.filter(meme => meme.name == memeName);
-        
-        // remove meme from memes
-        const memeIndex = memes.indexOf(meme[0]);
-        if (memeIndex > -1) {
-            memes.splice(memeIndex, 1);
-        }
+
+        // check to see if user has admin priviliges
+        const userReference = Fire.getDatabase().child("normies").child(Fire.getUserId());
+        Fire.read(userReference, function (snapshot) {
+            const isAdmin = snapshot.val().isAdmin;
+
+            if (isAdmin) {
+                const memeReference = Fire.getDatabase().child("memes").child(memeName);
+                Fire.remove(memeReference,
+                    function () {
+                        console.log("Successfully removed meme.");
+                    },
+                    function (error) {
+                        console.log("Failure to remove meme.");
+                        console.log(error.code + ": " + error.message);
+                    });
+            } else {
+                console.log("Only admins can remove memes.");
+                alert("Only admins can remove memes!");
+            }
+        }, app.removeMemeReadErrorCallback);
 
         // refresh the meme list to mimic changes
         app.refreshMemeList();
+    },
+
+    /**
+     * Handles error during Fire.read() for removeMeme.
+     *
+     * @method removeMemeReadErrorCallback
+     */
+    removeMemeReadErrorCallback (error) {
+        console.log("Failure to read user data.");
+        console.log(error.code + ": " + error.message);
     },
 
     /**
