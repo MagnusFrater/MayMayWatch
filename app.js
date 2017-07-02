@@ -18,7 +18,10 @@ const app = {
      */
     init () {
         // general
+        normie.reset();
         this.setSelectedMemeCategory("bestof");
+        this.refreshMemeList();
+        this.toggleAddMemeForm(normie.isAdmin);
 
         // attach listeners
         this.attachAllListeners();
@@ -49,12 +52,12 @@ const app = {
     toggleAddMemeForm (toggle) {
         const addMemeForm = document.getElementById("addMemeForm");
 
-        if (toggle) {
+        if (toggle === true) {
             // form hidden, show it
             addMemeForm.classList.remove("hide");
         } else {
             // form showing, hide it
-            addMemeForm.className += "hide";
+            addMemeForm.className += " hide";
         }
     },
 
@@ -662,13 +665,11 @@ const app = {
      * @method setSignupModal
      */
     setSignupModal () {
-        // modal.style.display = "block";
-        
         // get necessary elements
         const loginSignupDiv = document.getElementById("signupModalForms");
         const logoutDiv = document.getElementById("signupModalLogoutDiv");
 
-        // toggle the divs as needed
+        // toggle the login/signup divs as needed
         if (normie.loggedIn) {
             loginSignupDiv.style.display = "none";
             logoutDiv.style.display = "block";
@@ -684,12 +685,76 @@ const app = {
      * @method signinCallback
      */
     signinCallback () {
+        console.log("User signed in.");
+
         // update normie
-        normie.loggedIn = true;
-        this.setAdminStatus(true);
+        const reference = Fire.getDatabase().child("normies").child(Fire.getUserId());
+        Fire.read(reference, app.signinReadSuccessCallback, app.signinErrorCallback);
 
         // makes sure #signupModal shows the correct forms
         this.setSignupModal();
+    },
+
+    /**
+     * Handles a successful Fire.read() on signin.
+     *
+     * @method signinReadSuccessCallback
+     */
+    signinReadSuccessCallback (snapshot) {
+        // pull normie data from firebase realtime database
+        const loggedIn = true;
+        const isAdmin = snapshot.val().isAdmin;
+        //console.log("isAdmin: " + isAdmin);
+
+        const username = snapshot.val().username;
+        //console.log("username: " + username);
+
+        const likes = snapshot.val().likes;
+        //console.log("likes: " + likes);
+
+        const dislikes = snapshot.val().dislikes;
+        //console.log("dislikes: " + dislikes);
+
+        const favourites = snapshot.val().favourites;
+        //console.log("favourites: " + favourites);
+
+        normie = new Normie(loggedIn, isAdmin, username, likes, dislikes, favourites);
+
+        console.log("Successfully read user data.");
+
+        // refresh necessary page elements
+        app.setSelectedMemeCategory("bestof");
+        app.setAdminStatus(normie.isAdmin);
+        app.refreshMemeList();
+
+        // reset #signupModal
+        app.setSignupModal();
+    },
+
+    /**
+     * Handles a Fire.read() error on signin.
+     *
+     * @method signinReadErrorCallback
+     */
+    signinReadErrorCallback (error) {
+        console.log("Error getting user information. Loggin out.");
+        console.log(eror.code + ": " + error.message);
+
+        alert("Failure to read user data!");
+
+        // reset normie
+        normie.reset();
+
+        // refresh necessary page elements
+        app.setSelectedMemeCategory("bestof");
+        app.setAdminStatus(normie.isAdmin);
+        app.refreshMemeList();
+
+        // reset #signupModal
+        app.setSignupModal();
+
+        // log user out
+        Fire.logout(app.logoutSuccessCallback, app.logoutErrorCallback);
     },
 
     /**
@@ -698,12 +763,18 @@ const app = {
      * @method signoutCallback
      */
     signoutCallback () {
-        // set normie to logged out
-        normie.loggedIn = false;
-        this.setAdminStatus(false);
+        console.log("User signed out.");
 
-        // makes sure #signupModal shows the correct forms
-        this.setSignupModal();
+        // reset normie
+        normie.reset();
+
+        // refresh necessary page elements
+        app.setSelectedMemeCategory("bestof");
+        app.setAdminStatus(normie.isAdmin);
+        app.refreshMemeList();
+
+        // reset #signupModal
+        app.setSignupModal();
     },
 
     /**
@@ -743,6 +814,90 @@ const app = {
     },
 
     /**
+     * Handles a successful Firebase signup.
+     *
+     * @method signupSuccessCallback
+     * 
+     * @param {string} username - username
+     */
+    signupSuccessCallback (username) {
+        console.log("Signed up.");
+
+        // formu data needed for new user account creation
+        const reference = Fire.getDatabase().child("normies").child(Fire.getUserId());
+        const data = {
+            isAdmin: false,
+            username: username,
+            likes: {},
+            dislikes: {},
+            favourites: {}
+        }
+
+        // recreate Normie with the new user account creation data (just in case this gets run after the signinSuccessCallback)
+        normie = new Normie(true, data.isAdmin, data.username, data.likes, data.dislikes, data.favourites);
+
+        // refresh necessary page elements
+        app.setSelectedMemeCategory("bestof");
+        app.setAdminStatus(normie.isAdmin);
+        app.refreshMemeList();
+
+        // reset #signupModal
+        app.setSignupModal();
+
+        // write new firebase database info for new normie (user)
+        Fire.write(reference, data, app.signupWriteSuccessCallback, app.signupWriteErrorCallback);
+    },
+
+    /**
+     * Handles a Firebase signup error.
+     *
+     * @method signupErrorCallback
+     */
+    signupErrorCallback (error) {
+        // write error to console
+        console.log("Signup error.");
+        console.log(error.code + ": " + error.message);
+
+        // alert the user
+        alert("Sign Up Failure!");
+        
+        // delete (bad) user account
+        Fire.deleteUser(app.deleteUserSuccessCallback, app.deleteUserErrorCallback);
+    },
+
+    /**
+     * Handles a successful Fire.write() on signup.
+     *
+     * @method signupWriteSuccessCallback
+     */
+    signupWriteSuccessCallback () {
+        console.log("Wrote new user data.")
+
+        // refresh necessary page elements
+        app.setSelectedMemeCategory("bestof");
+        app.setAdminStatus(normie.isAdmin);
+        app.refreshMemeList();
+
+        // reset #signupModal
+        app.setSignupModal();
+    },
+
+    /**
+     * Handles a Fire.write() error on signup.
+     *
+     * @method signupWriteErrorCallback
+     */
+    signupWriteErrorCallback (error) {
+        console.log("Error writing new user data. Deleting (bad) user account.");
+        console.log(error.code + ": " + error.message);
+
+        alert("Failure to write new user data!");
+
+        // delete (bad) user account
+        Fire.deleteUser(app.deleteUserSuccessCallback, app.deleteUserErrorCallback);
+    },
+
+    /**
      * Logs user into firebase.
      *
      * @method login
@@ -769,6 +924,27 @@ const app = {
     },
 
     /**
+     * Handles a successful Firebase login.
+     *
+     * @method loginSuccessCallback
+     */
+    loginSuccessCallback () {
+        console.log("Logged in.");
+    },
+
+    /**
+     * Handles a Firebase login error.
+     *
+     * @method loginErrorCallback
+     */
+    loginErrorCallback (error) {
+        console.log("Error logging in.");
+        console.log(error.code + ": " + error.message);
+
+        alert("Login failure!");
+    },
+
+    /**
      * Logs user out of firebase.
      *
      * @method logout
@@ -787,64 +963,6 @@ const app = {
     },
 
     /**
-     * Handles a successful Firebase signup.
-     *
-     * @method signupSuccessCallback
-     * 
-     * @param {string} username - username
-     */
-    signupSuccessCallback (username) {
-        console.log("Signed up.");
-
-        const reference = Fire.getDatabase().child("normies").child(Fire.getUserId());
-        const data = {
-            isAdmin: false,
-            username: username,
-            likes: {},
-            dislikes: {},
-            favourites: {}
-        }
-
-        // write new firebase database info for new normie (user)
-        Fire.write(reference, data, app.firebaseWriteSuccessCallback, app.firebaseWriteErrorCallback);
-    },
-
-    /**
-     * Handles a Firebase signup error.
-     *
-     * @method signupErrorCallback
-     */
-    signupErrorCallback () {
-        alert("Sign Up Failure!");
-        
-        Fire.logout(app.logoutSuccessCallback, app.logoutErrorCallback);
-    },
-
-    /**
-     * Handles a successful Firebase login.
-     *
-     * @method logoutSuccessCallback
-     */
-    loginSuccessCallback () {
-        console.log("Logged in.");
-
-        const reference = Fire.getDatabase().child("normies").child(Fire.getUserId());
-                
-        // get normie details from firebase database
-        Fire.read(reference, app.firebaseReadSuccessCallback, app.firebaseReadErrorCallback);
-    },
-
-    /**
-     * Handles a Firebase login error.
-     *
-     * @method loginErrorCallback
-     */
-    loginErrorCallback () {
-        console.log("Error logging in.");
-        alert("Login failure!");
-    },
-
-    /**
      * Handles a successful Firebase logout.
      *
      * @method logoutSuccessCallback
@@ -854,6 +972,14 @@ const app = {
 
         // reset normie
         normie.reset();
+
+        // refresh necessary page elements
+        app.setSelectedMemeCategory("bestof");
+        app.setAdminStatus(normie.isAdmin);
+        app.refreshMemeList();
+
+        // reset #signupModal
+        app.setSignupModal();
     },
 
     /**
@@ -866,56 +992,27 @@ const app = {
     },
 
     /**
-     * Handles a successful Fire.write().
+     * Handles a successful Fire.deleteUser().
      *
-     * @method firebaseWriteSuccessCallback
+     * @method deleteUserSuccessCallback
      */
-    firebaseWriteSuccessCallback () {
-        console.log("Wrote new user data.")
-    },
+    deleteUserSuccessCallback () {
+        console.log("Successfully deleted user account.");
 
-    /**
-     * Handles a Fire.write() error.
-     *
-     * @method firebaseWriteErrorCallback
-     */
-    firebaseWriteErrorCallback () {
-        console.log("Error writing new user data. Logging out.");
-
-        // log user out
+        // log user out if not already logged out
         Fire.logout(app.logoutSuccessCallback, app.logoutErrorCallback);
     },
 
     /**
-     * Handles a successful Fire.read().
+     * Handles a Fire.deleteUser() error.
      *
-     * @method firebaseReadSuccessCallback
+     * @method deleteUserErrorCallback
      */
-    firebaseReadSuccessCallback () {
-        // reset normie
-        normie.isAdmin = snapshot.val().isAdmin;
-        normie.username = snapshot.val().username;
-        normie.likes = snapshot.val().likes;
-        normie.dislikes = snapshot.val().dislikes;
-        normie.favourites = snapshot.val().favourites;
+    deleteUserErrorCallback (error) {
+        console.log("Error deleting user account.");
+        console.log(error.code + ": " + error.message);
 
-        // refresh necessary page elements
-        app.setSelectedMemeCategory("bestof");
-        app.setAdminStatus(normie.isAdmin);
-        app.refreshMemeList();
-
-        console.log("Successfully read data.");
-    },
-
-    /**
-     * Handles a Fire.read() error.
-     *
-     * @method firebaseReadErrorCallback
-     */
-    firebaseReadErrorCallback () {
-        console.log("Error reading user data.");
-
-        Fire.logout(app.logoutSuccessCallback, app.logoutErrorCallback);
+        alert("Failure to delete user account!");
     },
 
     /**

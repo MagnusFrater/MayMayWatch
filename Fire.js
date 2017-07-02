@@ -39,7 +39,7 @@ const Fire = {
      * @param {string} email - sign up email
      * @param {string} password - sign up password
      * @param {string} repassword - reentered sign up password
-     * @param {callback} onSuccessCallback - callback for signup success; returns Firebase user as parameter
+     * @param {callback} onSuccessCallback - (OPTIONAL) callback for signup success; returns Firebase user as parameter
      * @param {callback} onErrorCallback - (OPTIONAL) callback for signup error; returns error as parameter
      */
     signUpEmailPassword (email, password, repassword, onSuccessCallback, onErrorCallback) {
@@ -49,22 +49,19 @@ const Fire = {
             // create new user via email/password auth
             firebase.auth().createUserWithEmailAndPassword(email, password)
                 .then(function (user) {
-                    // successful sign up
                     if (onSuccessCallback) onSuccessCallback(user);
                 })
                 .catch(function (error) {
-                    // get error message
-                    const errorMessage = "Fire: " + error.code + ": " + error.message;
-
-                    // print error message
-                    console.log("Fire: Failure to signup via email/password authentication!");
-                    console.log(errorMessage);
-
                     if (onErrorCallback) onErrorCallback(error);
                 });
         } else {
             // sign up credentials invalid
-            if (onErrorCallback) onErrorCallback();
+            const error = {
+                code: "Bad credentials",
+                message: "Sign up credentials were invalid."
+            }
+
+            if (onErrorCallback) onErrorCallback(error);
         }
     },
 
@@ -133,7 +130,7 @@ const Fire = {
      * 
      * @param {string} email - login email
      * @param {string} password - login password
-     * @param {callback} onSuccessCallback - callback for login success; returns Firebase user as parameter
+     * @param {callback} onSuccessCallback - (OPTIONAL) callback for login success; returns Firebase user as parameter
      * @param {callback} onErrorCallback - (OPTIONAL) callback for login error; returns error as parameter
      */
     loginEmailPassword (email, password, onSuccessCallback, onErrorCallback) {
@@ -147,18 +144,16 @@ const Fire = {
                     if (onSuccessCallback) onSuccessCallback(user);
                 })
                 .catch(function (error) {
-                    // get error message
-                    const errorMessage = "Fire: " + error.code + ": " + error.message;
-
-                    // print error message
-                    console.log("Fire: Failure to login via email/password authentication!");
-                    console.log(errorMessage);
-
                     if (onErrorCallback) onErrorCallback(error);
                 });
         } else {
             // login credentials invalid
-            if (onErrorCallback) onErrorCallback();
+            const error = {
+                code: "Bad credentials",
+                message: "Login credentials were invalid."
+            }
+
+            if (onErrorCallback) onErrorCallback(error);
         }
     },
 
@@ -221,13 +216,6 @@ const Fire = {
                 if (onSuccessCallback) onSuccessCallback();
             })
             .catch(function (error) {
-                // get error message
-                const errorMessage = "Fire: " + error.code + ": " + error.message;
-
-                // print error message
-                console.log("Fire: Failure to logout");
-                console.log(errorMessage);
-
                 if (onErrorCallback) onErrorCallback(error);
             });
     },
@@ -401,7 +389,7 @@ const Fire = {
     },
 
     /**
-     * Removes listener at specified realtime database reference.
+     * Removes all listeners at specified realtime database reference.
      *
      * @method listen
      * 

@@ -2,5 +2,4 @@
 memes = [];
 
 // normie
-normie = new Normie(false, "", {}, {}, {});
-normie.reset();
+normie = new Normie(false, false, "", {}, {}, {});
