@@ -32,7 +32,7 @@ const Fire = {
     },
 
     /**
-     * Signs a user up via email/password auth.
+     * Signs the user up via email/password auth.
      *
      * @method signUpEmailPassword
      * 
@@ -127,7 +127,7 @@ const Fire = {
     },
 
     /**
-     * Logs in a user via email/password auth.
+     * Logs the user in via email/password auth.
      *
      * @method loginEmailPassword
      * 
@@ -207,7 +207,7 @@ const Fire = {
     },
 
     /**
-     * Logs a user out.
+     * Logs the user out.
      *
      * @method logout
      * 
@@ -228,6 +228,110 @@ const Fire = {
                 console.log("Fire: Failure to logout");
                 console.log(errorMessage);
 
+                if (onErrorCallback) onErrorCallback(error);
+            });
+    },
+
+    /**
+     * Reauthenticates the user so they may set primary email address, change password, or delete their account.
+     *
+     * @method reauthenticate
+     * 
+     * @param {callback} onSuccessCallback - (OPTIONAL) callback for successful reauthentication
+     * @param {callback} onErrorCallback - (OPTIONAL) callback for reauthentication error; returns error as parameter
+     */
+    reauthenticate (credential, onSuccessCallback, onErrorCallback) {
+        firebase.auth().currentUser.reauthenticate(credential)
+            .then(function() {
+                if (onSuccessCallback) onSuccessCallback();
+            }, function(error) {
+                if (onErrorCallback) onErrorCallback(error);
+            });
+    },
+
+    /**
+     * Updates the user's email address.
+     *
+     * @method updateEmailAddress
+     * 
+     * @param {string} email - new email to update with
+     * @param {callback} onSuccessCallback - (OPTIONAL) callback for successful email update
+     * @param {callback} onErrorCallback - (OPTIONAL) callback for email update error; returns error as parameter
+     */
+    updateEmailAddress (email, onSuccessCallback, onErrorCallback) {
+        firebase.auth().currentUser.updateEmail(email)
+            .then(function() {
+                if (onSuccessCallback) onSuccessCallback();
+            }, function(error) {
+                if (onErrorCallback) onErrorCallback(error);
+            });
+    },
+
+    /**
+     * Sends the user an email address verification email.
+     *
+     * @method sendEmailVerification
+     * 
+     * @param {callback} onSuccessCallback - (OPTIONAL) callback for successful email sent
+     * @param {callback} onErrorCallback - (OPTIONAL) callback for send email error; returns error as parameter
+     */
+    sendEmailVerification (onSuccessCallback, onErrorCallback) {
+        firebase.auth().currentUser.sendEmailVerification()
+            .then(function() {
+                if (onSuccessCallback) onSuccessCallback();
+            }, function(error) {
+                if (onErrorCallback) onErrorCallback(error);
+            });
+    },
+
+    /**
+     * Updates the user's password.
+     *
+     * @method updatePassword
+     * 
+     * @param {string} password - new password to update with
+     * @param {callback} onSuccessCallback - (OPTIONAL) callback for successful password update
+     * @param {callback} onErrorCallback - (OPTIONAL) callback for password update error; returns error as parameter
+     */
+    updatePassword (password, onSuccessCallback, onErrorCallback) {
+        firebase.auth().currentUser.updatePassword(newPassword)
+            .then(function() {
+                if (onSuccessCallback) onSuccessCallback();
+            }, function(error) {
+                if (onErrorCallback) onErrorCallback(error);
+            });
+    },
+
+    /**
+     * Sends the user a password reset email.
+     *
+     * @method sendPasswordResetEmail
+     * 
+     * @param {callback} onSuccessCallback - (OPTIONAL) callback for successful password reset email sent
+     * @param {callback} onErrorCallback - (OPTIONAL) callback for password reset email error; returns error as parameter
+     */
+    sendPasswordResetEmail (email, onSuccessCallback, onErrorCallback) {
+        firebase.auth().sendPasswordResetEmail(email)
+            .then(function() {
+                if (onSuccessCallback) onSuccessCallback();
+            }, function(error) {
+                if (onErrorCallback) onErrorCallback(error);
+            });
+    },
+
+    /**
+     * Deletes a user account.
+     *
+     * @method deleteUser
+     * 
+     * @param {callback} onSuccessCallback - (OPTIONAL) callback for successful user account deletion
+     * @param {callback} onErrorCallback - (OPTIONAL) callback for user account deletion error; returns error as parameter
+     */
+    deleteUser (onSuccessCallback, onErrorCallback) {
+        firebase.auth().currentUser.delete()
+            .then(function() {
+                if (onSuccessCallback) onSuccessCallback();
+            }, function(error) {
                 if (onErrorCallback) onErrorCallback(error);
             });
     },
@@ -312,7 +416,7 @@ const Fire = {
             })
             .catch (function (error) {
                 if (onErrorCallback) onErrorCallback(error);
-            })
+            });
     },
 
     /**
