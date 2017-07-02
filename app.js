@@ -245,12 +245,14 @@ const app = {
 
         // add video category to meme if checked
         if (form.videoCheckbox.checked) {
-            meme.category += " video";
+            if (meme.category.length != 0) meme.category += ",";
+            meme.category += "video";
         }
 
         // add sound category to meme if checked
         if (form.soundCheckbox.checked) {
-            meme.category += " sound";
+            if (meme.category.length != 0) meme.category += ",";
+            meme.category += "sound";
         }
 
         // update the amount of memes
