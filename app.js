@@ -685,7 +685,7 @@ const app = {
                     const favouritesReference = userReference.child("favourites").child(memeName);
 
                     // write new favourites list for normie
-                    Fire.write(favouritesReference, memeName, app.favouriteMemeWriteSuccessCallback, app.favouriteMemeWriteSuccessCallback);
+                    Fire.write(favouritesReference, memeName, app.favouriteMemeWriteSuccessCallback, app.favouriteMemeWriteErrorCallback);
                 } else {
                     // Fire.js ran an error whilst reading from Firebase's realtime database
                     console.log("Failure to read from given realtime database reference.");
@@ -695,16 +695,6 @@ const app = {
 
         // refresh the meme list to mimic changes
         app.refreshMemeList();
-    },
-
-    /**
-     * Handles errors from getting a normie's current favourites.
-     *
-     * @method favouriteMemeReadErrorCallback
-     */
-    favouriteMemeReadErrorCallback (error) {
-        console.log("Failure to get normie's favourites.");
-        console.log(error.code + ": " + error.message);
     },
 
     /**
