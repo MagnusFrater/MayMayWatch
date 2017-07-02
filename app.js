@@ -198,17 +198,27 @@ const app = {
         // get the form
         const form = ev.target;
 
-        // check if addMeme input bar is empty
+        // check if addMeme memeName input bar is empty
         if (form.memeName.value.length == 0) {
-            alert("Add meme bar is empty!");
-            this.resetAddMemeForm(form);
+            alert("Meme Name is empty!");
+            return;
+        }
+
+        // check if addMeme memeReference input bar is empty
+        if (form.memeReference.value.length == 0) {
+            alert("Meme Reference is empty!");
+            return;
+        }
+
+        // check if addMeme memeResource input bar is empty
+        if (form.memeResource.value.length == 0) {
+            alert("Meme Resource is empty!");
             return;
         }
 
         // make sure at least one meme type is checked
         if (!form.imageCheckbox.checked && !form.videoCheckbox.checked && !form.soundCheckbox.checked) {
             alert("A meme always has a type!");
-            this.resetAddMemeForm(form);
             return;
         }
 
@@ -227,7 +237,9 @@ const app = {
             name: form.memeName.value,
             rating: 0,
             favourite: -1,
-            category: ""
+            category: "",
+            reference: form.memeReference.value,
+            resource: form.memeResource.value
         };
 
         // add image category to meme if checked
@@ -265,6 +277,9 @@ const app = {
      */
     resetAddMemeForm (form) {
         form.memeName.value = "";
+        form.memeReference.value = "";
+        form.memeResource.value = "";
+
         form.imageCheckbox.checked = false;
         form.videoCheckbox.checked = false;
         form.soundCheckbox.checked = false;
