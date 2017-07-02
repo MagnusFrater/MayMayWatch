@@ -285,9 +285,6 @@ const app = {
         // update the amount of memes
         this.memeCount++;
 
-        // add meme to app.memes
-        memes.push(meme);
-
         // write meme to Firebase's realtime database
         this.addMeme(meme);
 
@@ -555,13 +552,58 @@ const app = {
         const meme = memes.filter(meme => meme.name == memeName);
         
         // updoot meme
+        /*
         const memeIndex = memes.indexOf(meme[0]);
         if (memeIndex > -1) {
             memes[memeIndex].rating++;
         }
+        */
+
+        // get meme's rating reference from Firebase's realtime database
+        const reference = Fire.getDatabase().child("memes").child(memeName).child("rating");
+
+        // get current meme's rating
+        Fire.read(reference, function (snapshot) {
+            let rating = snapshot.val();
+
+            // updoot meme
+            rating++;
+
+            // write change
+            Fire.write(reference, rating, this.updootMemeWriteSuccessCallback, this.updootMemeWriteErrorCallback);
+        }, this.updootMemeGetRatingErrorCallback);
 
         // refresh the meme list to mimic changes
         app.refreshMemeList();
+    },
+
+    /**
+     * Handles errors from getting an updooted meme's current rating.
+     *
+     * @method updootMemeGetRatingErrorCallback
+     */
+    updootMemeGetRatingErrorCallback (error) {
+        console.log("Failed to get updooted meme's current value.");
+        console.log(error.code + ": " + error.message);
+    },
+
+    /**
+     * Handles successfully updooted meme.
+     *
+     * @method updootMemeWriteSuccessCallback
+     */
+    updootMemeWriteSuccessCallback () {
+        console.log("Updooted meme.");
+    },
+
+    /**
+     * Handles errors from setting an updooted meme's rating.
+     *
+     * @method updootMemeWriteErrorCallback
+     */
+    updootMemeWriteErrorCallback (error) {
+        console.log("Failed to set updooted meme's value.");
+        console.log(error.code + ": " + error.message);
     },
 
     /**
