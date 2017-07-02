@@ -17,7 +17,13 @@ const app = {
      * @method init
      */
     init () {
+        // initialize firebase
+        Fire.init(config);
+        Fire.createAuthStateListener(this.signinCallback.bind(this), this.signoutCallback.bind(this));
+
         // general
+        this.attachMemeDatabaseListener();
+
         normie.reset();
         this.setSelectedMemeCategory("bestof");
         this.refreshMemeList();
@@ -25,10 +31,31 @@ const app = {
 
         // attach listeners
         this.attachAllListeners();
+    },
 
-        // initialize firebase
-        Fire.init(config);
-        Fire.createAuthStateListener(this.signinCallback.bind(this), this.signoutCallback.bind(this));
+    /**
+     * Attaches a listener to the meme database to update [memes] on every single change.
+     *
+     * @method attachMemeDatabaseListener
+     */
+    attachMemeDatabaseListener () {
+        // create "memes" reference
+        const reference = Fire.getDatabase().child("memes");
+
+        // attach listener
+        Fire.listen(reference, this.getMemes, this.memeDatabaseListenerErrorCallback);
+    },
+
+    /**
+     * Handles errors that occur from attaching the meme listener.
+     *
+     * @method memeDatabaseListenerErrorCallback
+     */
+    memeDatabaseListenerErrorCallback (error) {
+        console.log("Failure to attach meme database listener.");
+        console.log(error.code + ": " + code.message);
+
+        alert("Failure to attach meme database listener.");
     },
 
     /**
@@ -1099,6 +1126,43 @@ const app = {
         console.log(error.code + ": " + error.message);
 
         alert("Error adding meme!");
+    },
+
+    /**
+     * Pulls all the memes from the Firebase realtime database to update [memes].
+     *
+     * @method getMemes
+     * 
+     * @param {DatabaseSnapshot} snapshot - snapshot of the meme database
+     */
+    getMemes (snapshot) {
+        console.log("Updating meme list.");
+
+        // reset [memes]
+        memes = [];
+
+        // cycle through meme data and add them to [memes]
+        Object.keys(snapshot.val())
+            .forEach(memeName => {
+                // get memeData
+                const memeData = snapshot.val()[memeName];
+
+                // get meme details
+                const name = memeData.name;
+                const category = memeData.category;
+                const rating = memeData.rating;
+                const reference = memeData.reference;
+                const resource = memeData.resource;
+
+                // create Meme object
+                const meme = new Meme(name, category, rating, reference, resource);
+
+                // add meme to [memes]
+                memes.push(meme);
+            });
+
+        // refresh meme list
+        app.refreshMemeList();
     },
 
     /**

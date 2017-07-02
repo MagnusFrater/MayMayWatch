@@ -382,8 +382,7 @@ const Fire = {
         return reference.on("value", 
             function (snapshot) {
                 onChangeCallback(snapshot);
-            })
-            .catch (function (error) {
+            }, function (error) {
                 if (onErrorCallback) onErrorCallback(error);
             });
     },
