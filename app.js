@@ -549,15 +549,6 @@ const app = {
     updootMeme () {
         // get meme data
         const memeName = this.dataset.meme;
-        const meme = memes.filter(meme => meme.name == memeName);
-        
-        // updoot meme
-        /*
-        const memeIndex = memes.indexOf(meme[0]);
-        if (memeIndex > -1) {
-            memes[memeIndex].rating++;
-        }
-        */
 
         // get meme's rating reference from Firebase's realtime database
         const reference = Fire.getDatabase().child("memes").child(memeName).child("rating");
@@ -572,9 +563,6 @@ const app = {
             // write change
             Fire.write(reference, rating, this.updootMemeWriteSuccessCallback, this.updootMemeWriteErrorCallback);
         }, this.updootMemeGetRatingErrorCallback);
-
-        // refresh the meme list to mimic changes
-        app.refreshMemeList();
     },
 
     /**
@@ -614,16 +602,49 @@ const app = {
     downdootMeme () {
         // get meme data
         const memeName = this.dataset.meme;
-        const meme = memes.filter(meme => meme.name == memeName);
-        
-        // remove meme from memes
-        const memeIndex = memes.indexOf(meme[0]);
-        if (memeIndex > -1) {
-            memes[memeIndex].rating--;
-        }
 
-        // refresh the meme list to mimic changes
-        app.refreshMemeList();
+        // get meme's rating reference from Firebase's realtime database
+        const reference = Fire.getDatabase().child("memes").child(memeName).child("rating");
+
+        // get current meme's rating
+        Fire.read(reference, function (snapshot) {
+            let rating = snapshot.val();
+
+            // downdoot meme
+            rating--;
+
+            // write change
+            Fire.write(reference, rating, this.downdootMemeWriteSuccessCallback, this.downdootMemeWriteErrorCallback);
+        }, this.downdootMemeGetRatingErrorCallback);
+    },
+
+    /**
+     * Handles errors from getting a downdooted meme's current rating.
+     *
+     * @method downdootMemeGetRatingErrorCallback
+     */
+    downdootMemeGetRatingErrorCallback (error) {
+        console.log("Failed to get downdooted meme's current value.");
+        console.log(error.code + ": " + error.message);
+    },
+
+    /**
+     * Handles successfully downdooted meme.
+     *
+     * @method downdootMemeWriteSuccessCallback
+     */
+    downdootMemeWriteSuccessCallback () {
+        console.log("Downdooted meme.");
+    },
+
+    /**
+     * Handles errors from setting a downdooted meme's rating.
+     *
+     * @method downdootMemeWriteErrorCallback
+     */
+    downdootMemeWriteErrorCallback (error) {
+        console.log("Failed to set downdooted meme's value.");
+        console.log(error.code + ": " + error.message);
     },
 
     /**
