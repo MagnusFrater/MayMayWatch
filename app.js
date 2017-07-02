@@ -655,16 +655,75 @@ const app = {
     favouriteMeme () {
         // get meme data
         const memeName = this.dataset.meme;
-        const meme = memes.filter(meme => meme.name == memeName);
-        
-        // remove meme from memes
-        const memeIndex = memes.indexOf(meme[0]);
-        if (memeIndex > -1) {
-            memes[memeIndex].favourite *= -1;
-        }
+
+        // create necessary data
+        const userReference = Fire.getDatabase().child("normies").child(Fire.getUserId());
+        const childKey = "favourites";
+
+        Fire.exists(userReference, childKey, 
+            function (favourites) {
+                // normie's favourites list exists
+
+                if (favourites.hasOwnProperty(memeName)) {
+                    // meme already favourited
+                    delete favourites[memeName];
+                } else {
+                    // meme not favourited
+                    favourites[memeName] = memeName;
+                }
+
+                // write normie's changed favourites
+                const favouritesReference = userReference.child("favourites");
+                Fire.write(favouritesReference, favourites, app.favouriteMemeWriteSuccessCallback, app.favouriteMemeWriteErrorCallback);
+            }, 
+            function (error) {
+                // either normie doesn't have a favourites list yet OR
+                // Fire.js ran an error whilst reading from Firebase's realtime database
+
+                if (error.code == "childKey nonexistent") {
+                    // normie doesn't have favourites list yet
+                    const favouritesReference = userReference.child("favourites").child(memeName);
+
+                    // write new favourites list for normie
+                    Fire.write(favouritesReference, memeName, app.favouriteMemeWriteSuccessCallback, app.favouriteMemeWriteSuccessCallback);
+                } else {
+                    // Fire.js ran an error whilst reading from Firebase's realtime database
+                    console.log("Failure to read from given realtime database reference.");
+                    console.log(error.code + ": " + error.message);
+                }
+            });
 
         // refresh the meme list to mimic changes
         app.refreshMemeList();
+    },
+
+    /**
+     * Handles errors from getting a normie's current favourites.
+     *
+     * @method favouriteMemeReadErrorCallback
+     */
+    favouriteMemeReadErrorCallback (error) {
+        console.log("Failure to get normie's favourites.");
+        console.log(error.code + ": " + error.message);
+    },
+
+    /**
+     * Handles successfully favouriting meme.
+     *
+     * @method favouriteMemeWriteSuccessCallback
+     */
+    favouriteMemeWriteSuccessCallback () {
+        console.log("Favourited meme.");
+    },
+
+    /**
+     * Handles errors from updating a normie's favourites list.
+     *
+     * @method favouriteMemeWriteErrorCallback
+     */
+    favouriteMemeWriteErrorCallback (error) {
+        console.log("Failure to update normie's favourites list.");
+        console.log(error.code + ": " + error.message);
     },
 
     /**
