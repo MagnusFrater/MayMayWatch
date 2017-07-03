@@ -316,12 +316,13 @@ const Fire = {
      * @param {callback} onErrorCallback - (OPTIONAL) callback for user account deletion error; returns error as parameter
      */
     deleteUser (onSuccessCallback, onErrorCallback) {
-        firebase.auth().currentUser.delete()
-            .then(function() {
-                if (onSuccessCallback) onSuccessCallback();
-            }, function(error) {
-                if (onErrorCallback) onErrorCallback(error);
-            });
+        const currentUser = firebase.auth().currentUser;
+        if(currentUser) currentUser.delete()
+                            .then(function() {
+                                if (onSuccessCallback) onSuccessCallback();
+                            }, function(error) {
+                                if (onErrorCallback) onErrorCallback(error);
+                            });
     },
 
     /**
@@ -450,15 +451,13 @@ const Fire = {
      */
     stop (reference, onSuccessCallback, onErrorCallback) {
         const off = reference.off();
-        if (off) {
-            off
-                .then (function () {
-                    if (onSuccessCallback) onSuccessCallback();
-                })
-                .catch (function (error) {
-                    if (onErrorCallback) onErrorCallback(error);
-                });
-        }
+        if (off) off
+                    .then (function () {
+                        if (onSuccessCallback) onSuccessCallback();
+                    })
+                    .catch (function (error) {
+                        if (onErrorCallback) onErrorCallback(error);
+                    });
     },
 
     /**
