@@ -81,6 +81,22 @@ li {
     color: orangered;
 }
 
+.updooted .updootMemeButton {
+    filter: brightness(100%);
+    color: orangered;
+}
+
+.downdooted .downdootMemeButton {
+    filter: brightness(100%);
+    color: orangered;
+}
+
+.favourited .favouriteMemeButton {
+    background-color: pink;
+    color: magenta;
+    filter: brightness(100%);
+}
+
 .memeButton {
     font-weight: bold;
 }

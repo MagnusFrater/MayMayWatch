@@ -20,39 +20,6 @@ function Normie (loggedIn, isAdmin, username, likes, dislikes, favourites) {
 }
 
 /**
- * Adds a new 'liked' meme.
- *
- * @method Normie.like
- * 
- * @param {string} memeName - name of the meme
- */
-Normie.prototype.like = function (memeName) {
-    this.likes.memeName = memeName;
-}
-
-/**
- * Adds a new 'disliked' meme.
- *
- * @method Normie.dislike
- * 
- * @param {string} memeName - name of the meme
- */
-Normie.prototype.dislike = function (memeName) {
-    this.dislikes.memeName = memeName;
-}
-
-/**
- * Adds a new 'favourited' meme.
- *
- * @method Normie.favourite
- * 
- * @param {string} memeName - name of the meme
- */
-Normie.prototype.favourite = function (memeName) {
-    this.favourites.memeName = memeName;
-}
-
-/**
  * Resets a normies data to disallow them certain logged in or admin priviliges.
  *
  * @method Normie.reset

@@ -422,6 +422,10 @@ const app = {
         memeListItem.id = meme.name;
         memeListItem.className = "grid-x text-center";
 
+        if (meme.updooted) memeListItem.className += " updooted";
+        if (meme.downdooted) memeListItem.className += " downdooted";
+        if (meme.favourited) memeListItem.className += " favourited";
+
         memeListItem.appendChild(this.createMemeRatingLabel(meme));
         memeListItem.appendChild(this.createMemeNameLabel(meme));
         if (normie.loggedIn) {
@@ -490,6 +494,8 @@ const app = {
         favouriteMemeButton.appendChild(this.createFontAwesomeIcon("favourite"));
         favouriteMemeButton.className = "medium-1 cell memeButton";
         favouriteMemeButton.dataset.meme = meme.name;
+
+        favouriteMemeButton.className += " favouriteMemeButton";
 
         if (meme.favourite == 1) {
             favouriteMemeButton.className += " favouriteMemeButton-selected";
@@ -829,7 +835,7 @@ const app = {
                             // meme updooted
                             delete updoots[memeName];
 
-                            dontdootCount++;
+                            downdootCount++;
                         } else {
                             // meme not updooted
                             // don't do anything
@@ -1581,6 +1587,21 @@ const app = {
                 // create Meme object
                 const meme = new Meme(name, category, rating, reference, resource);
 
+                // if normie has {likes}
+                if (normie.likes) {
+                    meme.updooted = normie.likes.hasOwnProperty(meme.name);
+                }
+
+                // if normie has {dislikes}
+                if (normie.dislikes) {
+                    meme.downdooted = normie.dislikes.hasOwnProperty(meme.name);
+                }
+
+                // if normie has {favourites}
+                if (normie.favourites) {
+                    meme.favourited = normie.favourites.hasOwnProperty(meme.name);
+                }
+
                 // add meme to [memes]
                 memes.push(meme);
             });
@@ -1601,9 +1622,9 @@ const app = {
         const loggedIn = true;
         const isAdmin = snapshot.val().isAdmin;
         const username = snapshot.val().username;
-        const likes = snapshot.val().likes;
-        const dislikes = snapshot.val().dislikes;
-        const favourites = snapshot.val().favourites;
+        const likes = app.cloneObject(snapshot.val().updoots);
+        const dislikes = app.cloneObject(snapshot.val().downdoots);
+        const favourites = app.cloneObject(snapshot.val().favourites);
 
         normie = new Normie(loggedIn, isAdmin, username, likes, dislikes, favourites);
 
@@ -1616,6 +1637,35 @@ const app = {
 
         // makes sure #signupModal shows the correct forms
         app.setSignupModal();
+
+        // update memes accordingly
+        const reference = Fire.getDatabase().child("memes");
+        Fire.read(reference, app.getMemes,
+            function (error) {
+                console.log("Failure to get memes.");
+                console.log(error.code + ": " + error.message);
+            });
+    },
+
+    /**
+     * Clones an object and returns it.
+     *
+     * @method cloneObject
+     * 
+     * @param {object} obj - object to clone
+     * 
+     * @return {object} cloned object
+     */
+    cloneObject (obj) {
+        if (null == obj || "object" != typeof obj) return obj;
+
+        var copy = obj.constructor();
+
+        for (var attr in obj) {
+            if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+        }
+
+        return copy;
     },
 
     /**
