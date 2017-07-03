@@ -453,7 +453,7 @@ const app = {
 
         // configure
         memeRatingLabel.innerHTML = meme.rating;
-        memeRatingLabel.className = "memeRatingLabel medium-1 cell";
+        memeRatingLabel.className = "memeRatingLabel verticalCenter medium-1 cell";
         memeRatingLabel.dataset.meme = meme.name;
 
         // return finished memeRatingLabel
@@ -479,7 +479,7 @@ const app = {
 
         // configure
         memeNameLabel.appendChild(link);
-        memeNameLabel.className = "memeNameLabel auto cell text-left";
+        memeNameLabel.className = "memeNameLabel verticalCenter auto cell text-left";
         memeNameLabel.dataset.meme = meme.name;
 
         // return finished memeNameLabel
@@ -499,7 +499,7 @@ const app = {
         const resourceDiv = document.createElement("div");
 
         // configure
-        resourceDiv.className = "resourceDiv auto cell";
+        resourceDiv.className = "resourceDiv verticalCenter auto cell";
         resourceDiv.dataset.meme = meme.name;
 
         // create actual resource
