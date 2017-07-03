@@ -64,6 +64,10 @@ li {
     padding-left: 3%;
 }
 
+.resourceDiv {
+    background-color: grey;
+}
+
 .favouriteMemeButton-unselected {
     background-color: pink;
     color: grey;

@@ -428,6 +428,7 @@ const app = {
 
         memeListItem.appendChild(this.createMemeRatingLabel(meme));
         memeListItem.appendChild(this.createMemeNameLabel(meme));
+        memeListItem.appendChild(this.createMemeResource(meme));
         if (normie.loggedIn) {
             memeListItem.appendChild(this.createUpdootMemeButton(meme));
             memeListItem.appendChild(this.createDowndootMemeButton(meme));
@@ -486,14 +487,54 @@ const app = {
     },
 
     /**
-     * Creates new memeResourceLabel.
+     * Creates new memeResource.
      *
-     * @method createMemeResourceLabel
+     * @method createMemeResource
      *
      * @param {object} meme - meme object
      */
-    createMemeResourceLabel (meme) {
+    createMemeResource (meme) {
+        // create necessary variables
+        const type = meme.resource;
+        const resourceDiv = document.createElement("div");
 
+        // configure
+        resourceDiv.className = "resourceDiv auto cell";
+        resourceDiv.dataset.meme = meme.name;
+
+        // create actual resource
+        let memeResource;
+
+        // resource is youtube video
+        if (type.includes("youtube") || type.includes("youtu.be")) {
+            // create iframe
+            memeResource = document.createElement("iframe");
+
+            // configure
+            memeResource.src = meme.resource;
+        }
+
+        // resource is a sound file
+         else if (type.includes("mp3") || type.includes("mpeg") || type.includes("ogg") || type.includes("wav")) {
+            memeResource = document.createElement('audio');
+
+            // configure
+            memeResource.controls = 'controls';
+            memeResource.src = meme.resource;
+        }
+
+        // resource is an image
+         else {
+            memeResource = document.createElement("img");
+            memeResource.src = meme.resource;
+        }
+
+        // configure
+        //memeResource.style.height = "5%";
+        resourceDiv.appendChild(memeResource);
+
+        // return newly created memeResource
+        return resourceDiv;
     },
 
     /**
