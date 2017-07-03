@@ -470,13 +470,30 @@ const app = {
         // create the memeNameLabel
         const memeNameLabel = document.createElement("div");
 
+        // compile link
+        const link = document.createElement("a");
+        link.innerHTML = meme.name;
+        link.href = meme.reference;
+        link.target = "_blank";
+
         // configure
-        memeNameLabel.innerHTML = meme.name;
+        memeNameLabel.appendChild(link);
         memeNameLabel.className = "memeNameLabel auto cell text-left";
         memeNameLabel.dataset.meme = meme.name;
 
         // return finished memeNameLabel
         return memeNameLabel;
+    },
+
+    /**
+     * Creates new memeResourceLabel.
+     *
+     * @method createMemeResourceLabel
+     *
+     * @param {object} meme - meme object
+     */
+    createMemeResourceLabel (meme) {
+
     },
 
     /**
