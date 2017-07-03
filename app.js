@@ -9,8 +9,6 @@ var config = {
 };
 
 const app = {
-    memeCount: 0,
-
     /**
      * Initializes the app.
      *
@@ -44,6 +42,43 @@ const app = {
 
         // attach listener
         Fire.listen(reference, this.getMemes, this.memeDatabaseListenerErrorCallback);
+    },
+
+    /**
+     * Attaches a listener to the normie's database reference to update the local normie on every single change.
+     *
+     * @method attachNormieListener
+     */
+    attachNormieListener () {
+        // create normie reference
+        const reference = Fire.getDatabase().child("normies").child(Fire.getUserId());
+
+        Fire.listen(reference, this.updateNormie,
+            function (error) {
+                console.log("Error attaching listener to normie's database reference.");
+                console.log(error.code + ": " + error.message);
+            });
+    },
+
+    /**
+     * Removes all listeners to the normie's database reference.
+     *
+     * @method removeNormieListener
+     */
+    removeNormieListener () {
+        // create normie reference
+        const reference = Fire.getDatabase().child("normies").child(Fire.getUserId());
+
+        Fire.stop(reference, 
+            function () {
+                // successful listener removal
+                console.log("Successfully removed all listeners at reference.");
+            },
+            function (error) {
+                // listener removal error
+                console.log("Failure to remove listener at reference point.");
+                console.log(error.code + ": " + error.message);
+            });
     },
 
     /**
@@ -282,9 +317,6 @@ const app = {
             meme.category += "sound";
         }
 
-        // update the amount of memes
-        this.memeCount++;
-
         // write meme to Firebase's realtime database
         this.addMeme(meme);
 
@@ -456,6 +488,7 @@ const app = {
 
         // configure
         favouriteMemeButton.innerHTML = "💕";
+        // downdootMemeButton.innerHTML = this.createFontAwesomeIcon("favourite");
         favouriteMemeButton.className = "medium-1 cell memeButton";
         favouriteMemeButton.dataset.meme = meme.name;
 
@@ -485,6 +518,7 @@ const app = {
 
         // configure
         removeMemeButton.innerHTML = "🗑️";
+        // downdootMemeButton.innerHTML = this.createFontAwesomeIcon("remove");
         removeMemeButton.className = "removeMemeButton medium-1 cell memeButton";
         removeMemeButton.dataset.meme = meme.name;
 
@@ -508,6 +542,7 @@ const app = {
 
         // configure
         updootMemeButton.innerHTML = "👍";
+        // downdootMemeButton.innerHTML = this.createFontAwesomeIcon("updoot");
         updootMemeButton.className = "updootMemeButton medium-1 cell memeButton";
         updootMemeButton.dataset.meme = meme.name;
 
@@ -531,6 +566,7 @@ const app = {
 
         // configure
         downdootMemeButton.innerHTML = "👎";
+        // downdootMemeButton.innerHTML = this.createFontAwesomeIcon("downdoot");
         downdootMemeButton.className = "downdootMemeButton medium-1 cell memeButton";
         downdootMemeButton.dataset.meme = meme.name;
 
@@ -539,6 +575,48 @@ const app = {
 
         // return finished downdootMemeButton
         return downdootMemeButton;
+    },
+
+    /**
+     * Creates new font awesome icon.
+     *
+     * @method createFontAwesomeIcon
+     *
+     * @param {string} type - type of font awesome icon to make
+     */
+    createFontAwesomeIcon (type) {
+        // create new element
+        const fontAwesome = document.createElement("i");
+
+        // configure
+        fontAwesome.setAttribute("aria-hidden", true);
+        fontAwesome.className = "fa ";
+
+        switch (type) {
+            case "updoot":
+                fontAwesome.className += "fa-thumbs-up";
+                break;
+
+            case "downdoot":
+                fontAwesome.className += "fa-thumbs-down";
+                break;
+
+            case "favourite":
+                fontAwesome.className += "fa-heart";
+                break;
+
+            case "remove":
+                fontAwesome.className += "fa-trash";
+                break;
+
+            default:
+                // should never catch here
+                // ie. updoot, downdoot, favourite, remove
+                console.log("Uknown font awesome type: " + type);
+        }
+
+        // return newly created fontAwesome element
+        return fontAwesome;
     },
 
     /**
@@ -866,74 +944,12 @@ const app = {
     signinCallback () {
         console.log("User signed in.");
 
-        // update normie
-        const reference = Fire.getDatabase().child("normies").child(Fire.getUserId());
-        Fire.read(reference, app.signinReadSuccessCallback, app.signinErrorCallback);
+        // remove old listeners, attach new normie listener
+        this.removeNormieListener();
+        this.attachNormieListener();
 
         // makes sure #signupModal shows the correct forms
         this.setSignupModal();
-    },
-
-    /**
-     * Handles a successful Fire.read() on signin.
-     *
-     * @method signinReadSuccessCallback
-     */
-    signinReadSuccessCallback (snapshot) {
-        // pull normie data from firebase realtime database
-        const loggedIn = true;
-        const isAdmin = snapshot.val().isAdmin;
-        //console.log("isAdmin: " + isAdmin);
-
-        const username = snapshot.val().username;
-        //console.log("username: " + username);
-
-        const likes = snapshot.val().likes;
-        //console.log("likes: " + likes);
-
-        const dislikes = snapshot.val().dislikes;
-        //console.log("dislikes: " + dislikes);
-
-        const favourites = snapshot.val().favourites;
-        //console.log("favourites: " + favourites);
-
-        normie = new Normie(loggedIn, isAdmin, username, likes, dislikes, favourites);
-
-        console.log("Successfully read user data.");
-
-        // refresh necessary page elements
-        app.setSelectedMemeCategory("bestof");
-        app.setAdminStatus(normie.isAdmin);
-        app.refreshMemeList();
-
-        // reset #signupModal
-        app.setSignupModal();
-    },
-
-    /**
-     * Handles a Fire.read() error on signin.
-     *
-     * @method signinReadErrorCallback
-     */
-    signinReadErrorCallback (error) {
-        console.log("Error getting user information. Loggin out.");
-        console.log(eror.code + ": " + error.message);
-
-        alert("Failure to read user data!");
-
-        // reset normie
-        normie.reset();
-
-        // refresh necessary page elements
-        app.setSelectedMemeCategory("bestof");
-        app.setAdminStatus(normie.isAdmin);
-        app.refreshMemeList();
-
-        // reset #signupModal
-        app.setSignupModal();
-
-        // log user out
-        Fire.logout(app.logoutSuccessCallback, app.logoutErrorCallback);
     },
 
     /**
@@ -1299,6 +1315,35 @@ const app = {
 
         // refresh meme list
         app.refreshMemeList();
+    },
+
+    /**
+     * Pulls the normie's private data from the Firebase realtime database to update the local normie.
+     *
+     * @method updateNormie
+     * 
+     * @param {DatabaseSnapshot} snapshot - snapshot of the meme database
+     */
+    updateNormie (snapshot) {
+        // pull normie data from firebase realtime database
+        const loggedIn = true;
+        const isAdmin = snapshot.val().isAdmin;
+        const username = snapshot.val().username;
+        const likes = snapshot.val().likes;
+        const dislikes = snapshot.val().dislikes;
+        const favourites = snapshot.val().favourites;
+
+        normie = new Normie(loggedIn, isAdmin, username, likes, dislikes, favourites);
+
+        console.log("Successfully updated normie data.");
+
+        // refresh necessary page elements
+        app.setSelectedMemeCategory("bestof");
+        app.setAdminStatus(normie.isAdmin);
+        app.refreshMemeList();
+
+        // makes sure #signupModal shows the correct forms
+        app.setSignupModal();
     },
 
     /**
