@@ -14,6 +14,12 @@ a:visited {
     text-decoration: none;
 }
 
+.resourceDiv {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 /* SEARCH BAR */
 #searchDiv {
     background-color: magenta;
