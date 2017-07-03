@@ -367,7 +367,8 @@ const app = {
             if (searchTerm && searchTerm.length != 0 && searchTerm != ""){
                 memeArray = memes.filter(meme => meme.name.toLowerCase().includes(searchTerm.toLowerCase()));
             } else {
-                memeArray = [];
+                searchTerm = document.getElementById("searchBar").value;
+                memeArray = memes.filter(meme => meme.name.toLowerCase().includes(searchTerm.toLowerCase()));
             }
         } else {
             // filter memes by category
@@ -700,59 +701,50 @@ const app = {
                     function (downdoots) {
                         // updoots exists; downdoots exists
 
-                        // handle updoots
-                        if (updoots.hasOwnProperty(memeName)) {
-                            // meme updooted
-                            // don't do anything
-                        } else {
-                            // meme not updooted
-                            updoots[memeName] = memeName;
+                        const isUpdooted = updoots.hasOwnProperty(memeName);
+                        const isDowndooted = downdoots.hasOwnProperty(memeName);
 
-                            // increase meme's rating
-                            updootCount++;
+                        if (isUpdooted) {
+                            delete updoots[memeName];
+                            Fire.write(normieReference.child("updoots"), updoots, null, null);
+                            app.decreaseMemeRating(memeName, 1);
+                            return;
+                        } else {
+                            if (isDowndooted) {
+                                delete downdoots[memeName];
+                                Fire.write(normieReference.child("downdoots"), downdoots, null, null);
+                                updoots[memeName] = memeName;
+                                Fire.write(normieReference.child("updoots"), updoots, null, null);
+                                app.increaseMemeRating(memeName, 2);
+                                return;
+                            } else {
+                                updoots[memeName] = memeName;
+                                Fire.write(normieReference.child("updoots"), updoots, null, null);
+                                app.increaseMemeRating(memeName, 1);
+                                return;
+                            }
                         }
 
-                        // handle downdoots
-                        if (downdoots.hasOwnProperty(memeName)) {
-                            // meme downdooted
-                            delete downdoots[memeName];
-
-                            updootCount++;
-                        } else {
-                            // meme not downdooted
-                            // don't do anything
-                        }
-
-                        //write changes to realtime database
-                        Fire.write(normieReference.child("updoots"), updoots, null, null);
-                        Fire.write(normieReference.child("downdoots"), downdoots, null, null);
-
-                        // only updoot meme when necessary
-                        if (updootCount != 0) app.increaseMemeRating(memeName, updootCount);
                     },
                     function (error) {
                         if (error.code == "childKey nonexistent") {
                             // updoots exists; downdoots !exists
 
-                            // handle updoots
-                            if (updoots.hasOwnProperty(memeName)) {
-                                // meme updooted
-                                // don't do anything
-                            } else {
-                                // meme not updooted
-                                updoots[memeName] = memeName;
+                            const isUpdooted = updoots.hasOwnProperty(memeName);
+                            const isDowndooted = false;
 
-                                // increase meme's rating
-                                updootCount++;
+                            if (isUpdooted) {
+                                delete updoots[memeName];
+                                Fire.write(normieReference.child("updoots"), updoots, null, null);
+                                app.decreaseMemeRating(memeName, 1);
+                                return;
+                            } else {
+                                updoots[memeName] = memeName;
+                                Fire.write(normieReference.child("updoots"), updoots, null, null);
+                                app.increaseMemeRating(memeName, 1);
+                                return;
                             }
 
-                            // don't need to handle downdoots (doesn't exist)
-
-                            // write changes to realtime database
-                            Fire.write(normieReference.child("updoots"), updoots, null, null);
-
-                            // only updoot meme when necessary
-                        if (updootCount != 0) app.increaseMemeRating(memeName, updootCount);
                         } else {
                             // Fire.js ran an error whilst reading from Firebase's realtime database
                             console.log("Failure to read from given realtime database reference.");
@@ -766,45 +758,39 @@ const app = {
                     function (downdoots) {
                         // updoots !exists; downdoots exists
 
-                        // don't need to handle updoots (doesn't exist)
-                        const updoot = {};
-                        updoot[memeName] = memeName;
-                        updootCount++;
+                        const isUpdooted = false;
+                        const isDowndooted = downdoots.hasOwnProperty(memeName);
 
-                        // handle downdoots
-                        if (downdoots.hasOwnProperty(memeName)) {
-                            // meme downdooted
+                        if (isDowndooted) {
                             delete downdoots[memeName];
-
-                            updootCount++;
+                            Fire.write(normieReference.child("downdoots"), downdoots, null, null);
+                            const updoot = {};
+                            updoot[memeName] = memeName;
+                            Fire.write(normieReference.child("updoots"), updoot, null, null);
+                            app.increaseMemeRating(memeName, 2);
+                            return;
                         } else {
-                            // meme not downdooted
-                            // don't do anything
+                            const updoot = {};
+                            updoot[memeName] = memeName;
+                            Fire.write(normieReference.child("updoots"), updoot, null, null);
+                            app.increaseMemeRating(memeName, 1);
+                            return;
                         }
 
-                        // write changes to realtime database
-                        Fire.write(normieReference.child("updoots"), updoot, null, null);
-                        Fire.write(normieReference.child("downdoots"), downdoots, null, null);
-
-                        // only updoot meme when necessary
-                        if (updootCount != 0) app.increaseMemeRating(memeName, updootCount);
                     },
                     function (error) {
                         if (error.code == "childKey nonexistent") {
                             // updoots !exists; downdoots !exists
 
-                            // don't need to handle updoots (doesn't exist)
+                            const isUpdooted = false;
+                            const isDowndooted = false;
+
                             const updoot = {};
                             updoot[memeName] = memeName;
-                            updootCount++;
-
-                            // don't need to handle downdoots (doesn't exist)
-
-                            // write changes to realtime database
                             Fire.write(normieReference.child("updoots"), updoot, null, null);
+                            app.increaseMemeRating(memeName, 1);
+                            return;
 
-                            // only updoot meme when necessary
-                            if (updootCount != 0) app.increaseMemeRating(memeName, updootCount);
                         } else {
                             // Fire.js ran an error whilst reading from Firebase's realtime database
                             console.log("Failure to read from given realtime database reference.");
@@ -888,62 +874,54 @@ const app = {
                     function (downdoots) {
                         // updoots exists; downdoots exists
 
-                        // handle updoots
-                        if (updoots.hasOwnProperty(memeName)) {
-                            // meme updooted
+                        const isUpdooted = updoots.hasOwnProperty(memeName);
+                        const isDowndooted = downdoots.hasOwnProperty(memeName);
+
+                        if (isUpdooted) {
                             delete updoots[memeName];
-
-                            downdootCount++;
-                        } else {
-                            // meme not updooted
-                            // don't do anything
-                        }
-
-                        // handle downdoots
-                        if (downdoots.hasOwnProperty(memeName)) {
-                            // meme downdooted
-                            // don't do anything
-                        } else {
-                            // meme not downdooted
+                            Fire.write(normieReference.child("updoots"), updoots, null, null);
                             downdoots[memeName] = memeName;
-
-                            // decrease meme's rating
-                            downdootCount++;
+                            Fire.write(normieReference.child("downdoots"), downdoots, null, null);
+                            app.decreaseMemeRating(memeName, 2);
+                            return;
+                        } else {
+                            if (isDowndooted) {
+                                delete downdoots[memeName];
+                                Fire.write(normieReference.child("downdoots"), downdoots, null, null);
+                                app.increaseMemeRating(memeName, 1);
+                                return;
+                            } else {
+                                downdoots[memeName] = memeName;
+                                Fire.write(normieReference.child("downdoots"), downdoots, null, null);
+                                app.decreaseMemeRating(memeName, 1);
+                                return;
+                            }
                         }
 
-                        //write changes to realtime database
-                        Fire.write(normieReference.child("updoots"), updoots, null, null);
-                        Fire.write(normieReference.child("downdoots"), downdoots, null, null);
-
-                        // only downdoot meme when necessary
-                        if (downdootCount != 0) app.decreaseMemeRating(memeName, downdootCount);
                     },
                     function (error) {
                         if (error.code == "childKey nonexistent") {
                             // updoots exists; downdoots !exists
 
-                            // handle updoots
-                            if (updoots.hasOwnProperty(memeName)) {
-                                // meme updooted
-                                delete updoots[memeName];
+                            const isUpdooted = updoots.hasOwnProperty(memeName);
+                            const isDowndooted = false;
 
-                                downdootCount++;
+                            if (isUpdooted) {
+                                delete updoots[memeName];
+                                Fire.write(normieReference.child("updoots"), updoots, null, null);
+                                const downdoot = {};
+                                downdoot[memeName] = memeName;
+                                Fire.write(normieReference.child("downdoots"), downdoot, null, null);
+                                app.decreaseMemeRating(memeName, 2);
+                                return;
                             } else {
-                                // meme not updooted
-                                // don't do anything
+                                const downdoot = {};
+                                downdoot[memeName] = memeName;
+                                Fire.write(normieReference.child("downdoots"), downdoot, null, null);
+                                app.decreaseMemeRating(memeName, 1);
+                                return;
                             }
 
-                            // don't need to handle downdoots (doesn't exist)
-                            const downdoot = {};
-                            downdoot[memeName] = memeName;
-                            downdootCount++;
-
-                            // write changes to realtime database
-                            Fire.write(normieReference.child("updoots"), updoots, null, null);
-                            Fire.write(normieReference.child("downdoots"), downdoot, null, null);
-
-                            // only downdoot meme when necessary
-                            if (downdootCount != 0) app.decreaseMemeRating(memeName, downdootCount);
                         } else {
                             // Fire.js ran an error whilst reading from Firebase's realtime database
                             console.log("Failure to read from given realtime database reference.");
@@ -957,45 +935,35 @@ const app = {
                     function (downdoots) {
                         // updoots !exists; downdoots exists
 
-                        // don't need to handle updoots (doesn't exist)
+                        const isUpdooted = false;
+                        const isDowndooted = downdoots.hasOwnProperty(memeName);
 
-                        // handle downdoots
-                        if (downdoots.hasOwnProperty(memeName)) {
-                            // meme downdooted
-                            // don't do anything
+                        if (isDowndooted) {
+                            delete downdoots[memeName];
+                            Fire.write(normieReference.child("downdoots"), downdoots, null, null);
+                            app.increaseMemeRating(memeName, 1);
+                            return;
                         } else {
-                            // meme not downdooted
                             downdoots[memeName] = memeName;
-
-                            // decrease meme's rating
-                            downdootCount++;
+                            Fire.write(normieReference.child("downdoots"), downdoots, null, null);
+                            app.decreaseMemeRating(memeName, 1);
+                            return;
                         }
 
-                        // write changes to realtime database
-                        Fire.write(normieReference.child("downdoots"), downdoots, null, null);
-
-                        // only downdoot meme when necessary
-                        if (downdootCount != 0) app.decreaseMemeRating(memeName, downdootCount);
                     },
                     function (error) {
                         if (error.code == "childKey nonexistent") {
                             // updoots !exists; downdoots !exists
 
-                            // don't need to handle updoots (doesn't exist)
+                            const isUpdooted = false;
+                            const isDowndooted = false;
 
-                            // don't need to handle downdoots (doesn't exist)
                             const downdoot = {};
                             downdoot[memeName] = memeName;
-                            downdootCount++;
-
-                            // write changes to realtime database
                             Fire.write(normieReference.child("downdoots"), downdoot, null, null);
+                            app.decreaseMemeRating(memeName, 1);
+                            return;
 
-                            // decrease meme's rating
-                            app.decreaseMemeRating(memeName);
-
-                            // only downdoot meme when necessary
-                            if (downdootCount != 0) app.decreaseMemeRating(memeName, downdootCount);
                         } else {
                             // Fire.js ran an error whilst reading from Firebase's realtime database
                             console.log("Failure to read from given realtime database reference.");
@@ -1297,7 +1265,7 @@ const app = {
         normie.reset();
 
         // refresh necessary page elements
-        app.setSelectedMemeCategory("bestof");
+        //app.setSelectedMemeCategory("bestof");
         app.setAdminStatus(normie.isAdmin);
         app.refreshMemeList();
 
@@ -1365,7 +1333,7 @@ const app = {
         normie = new Normie(true, data.isAdmin, data.username, data.likes, data.dislikes, data.favourites);
 
         // refresh necessary page elements
-        app.setSelectedMemeCategory("bestof");
+        //app.setSelectedMemeCategory("bestof");
         app.setAdminStatus(normie.isAdmin);
         app.refreshMemeList();
 
@@ -1402,7 +1370,7 @@ const app = {
         console.log("Wrote new user data.")
 
         // refresh necessary page elements
-        app.setSelectedMemeCategory("bestof");
+        //app.setSelectedMemeCategory("bestof");
         app.setAdminStatus(normie.isAdmin);
         app.refreshMemeList();
 
@@ -1502,7 +1470,7 @@ const app = {
         normie.reset();
 
         // refresh necessary page elements
-        app.setSelectedMemeCategory("bestof");
+        //app.setSelectedMemeCategory("bestof");
         app.setAdminStatus(normie.isAdmin);
         app.refreshMemeList();
 
@@ -1689,7 +1657,7 @@ const app = {
         console.log("Successfully updated normie data.");
 
         // refresh necessary page elements
-        app.setSelectedMemeCategory("bestof");
+        //app.setSelectedMemeCategory("bestof");
         app.setAdminStatus(normie.isAdmin);
         app.refreshMemeList();
 
