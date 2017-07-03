@@ -487,7 +487,6 @@ const app = {
         const favouriteMemeButton = document.createElement("button");
 
         // configure
-        // favouriteMemeButton.innerHTML = "💕&#xFE0E;";
         favouriteMemeButton.appendChild(this.createFontAwesomeIcon("favourite"));
         favouriteMemeButton.className = "medium-1 cell memeButton";
         favouriteMemeButton.dataset.meme = meme.name;
@@ -517,7 +516,6 @@ const app = {
         const removeMemeButton = document.createElement("button");
 
         // configure
-        // removeMemeButton.innerHTML = "🗑️&#xFE0E;";
         removeMemeButton.appendChild(this.createFontAwesomeIcon("remove"));
         removeMemeButton.className = "removeMemeButton medium-1 cell memeButton";
         removeMemeButton.dataset.meme = meme.name;
@@ -541,7 +539,6 @@ const app = {
         const updootMemeButton = document.createElement("button");
 
         // configure
-        // updootMemeButton.innerHTML = "👍&#xFE0E;";
         updootMemeButton.appendChild(this.createFontAwesomeIcon("updoot"));
         updootMemeButton.className = "updootMemeButton medium-1 cell memeButton";
         updootMemeButton.dataset.meme = meme.name;
@@ -565,7 +562,6 @@ const app = {
         const downdootMemeButton = document.createElement("button");
 
         // configure
-        // downdootMemeButton.innerHTML = "👎&#xFE0E;";
         downdootMemeButton.appendChild(this.createFontAwesomeIcon("downdoot"));
         downdootMemeButton.className = "downdootMemeButton medium-1 cell memeButton";
         downdootMemeButton.dataset.meme = meme.name;

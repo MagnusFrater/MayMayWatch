@@ -67,13 +67,18 @@ li {
     filter: brightness(80%);
 }
 
-.removeMemeButton:hover, .updootMemeButton:hover, .downdootMemeButton:hover {
+.removeMemeButton:hover {
     filter: brightness(100%);
 }
 
 .updootMemeButton, .downdootMemeButton {
     background-color: lightblue;
     color: blue;
+}
+
+.updootMemeButton:hover, .downdootMemeButton:hover {
+    filter: brightness(100%);
+    color: orangered;
 }
 
 .memeButton {
