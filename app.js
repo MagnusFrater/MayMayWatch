@@ -1327,7 +1327,7 @@ const app = {
         console.log(error.code + ": " + error.message);
 
         // alert the user
-        alert("Sign Up Failure!");
+        alert(error.message);
         
         // delete (bad) user account
         Fire.deleteUser(app.deleteUserSuccessCallback, app.deleteUserErrorCallback);
@@ -1359,7 +1359,7 @@ const app = {
         console.log("Error writing new user data. Deleting (bad) user account.");
         console.log(error.code + ": " + error.message);
 
-        alert("Failure to write new user data!");
+        alert(error.message);
 
         // delete (bad) user account
         Fire.deleteUser(app.deleteUserSuccessCallback, app.deleteUserErrorCallback);
@@ -1409,7 +1409,7 @@ const app = {
         console.log("Error logging in.");
         console.log(error.code + ": " + error.message);
 
-        alert("Login failure!");
+        alert(error.message);
     },
 
     /**
@@ -1455,8 +1455,11 @@ const app = {
      *
      * @method logoutErrorCallback
      */
-    logoutErrorCallback () {
-        console.log("Error logging out.");
+    logoutErrorCallback (error) {
+        console.log("Failure to log out.");
+        console.log(error.code + ": " + error.message);
+
+        alert(error.message);
     },
 
     /**
@@ -1480,7 +1483,7 @@ const app = {
         console.log("Error deleting user account.");
         console.log(error.code + ": " + error.message);
 
-        alert("Failure to delete user account!");
+        alert(error.message);
     },
 
     /**
@@ -1550,7 +1553,7 @@ const app = {
         console.log("Failed to write meme to Firebase's realtime database.");
         console.log(error.code + ": " + error.message);
 
-        alert("Error adding meme!");
+        alert(error.message);
     },
 
     /**
